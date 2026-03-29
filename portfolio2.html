@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Madhav Arora — Financial Analyst</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --black:  #050507;
+      --white:  #F0EDE8;
+      --grey:   #6B6B6B;
+      --accent: #C8A96E;   /* gold — money colour */
+      --dim:    #111114;
+      --border: rgba(240,237,232,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    .cursor {
+      position: fixed; width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: transform 0.1s, width 0.3s, height 0.3s;
+    }
+    .cursor-ring {
+      position: fixed; width: 36px; height: 36px;
+      border: 1px solid rgba(200,169,110,0.5); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: transform 0.15s ease-out, width 0.3s, height 0.3s;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 500;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.4rem 4%;
+      mix-blend-mode: difference;
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem; letter-spacing: 0.15em;
+      color: var(--white); text-decoration: none;
+    }
+    .nav-right { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-right a {
+      color: rgba(240,237,232,0.5); text-decoration: none;
+      font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 500; transition: color 0.3s;
+    }
+    .nav-right a:hover { color: var(--white); }
+
+    /* ── SECTIONS FULL SCREEN ── */
+    .panel {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 0 4% 5vh;
+      position: relative; overflow: hidden;
+    }
+
+    /* ── PANEL 1 — HERO ── */
+    #p1 { background: var(--black); justify-content: center; padding-top: 10vh; }
+
+    .hero-eyebrow {
+      font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .hero-eyebrow::before { content:''; width:30px; height:1px; background:var(--accent); }
+
+    .hero-headline {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 14vw, 16rem);
+      line-height: 0.88;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 0.15em;
+    }
+    .hero-headline .italic {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-bottom {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-top: 4rem; padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .hero-desc {
+      max-width: 360px; color: var(--grey);
+      font-size: 0.92rem; line-height: 1.8; font-weight: 300;
+    }
+    .hero-cta {
+      display: flex; align-items: center; gap: 1rem;
+      font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--white); text-decoration: none;
+      border: 1px solid var(--border); padding: 1rem 1.8rem; border-radius: 50px;
+      transition: all 0.3s;
+    }
+    .hero-cta:hover { background: var(--white); color: var(--black); }
+    .hero-cta .arrow { font-size: 1rem; transition: transform 0.3s; }
+    .hero-cta:hover .arrow { transform: translate(4px, -4px); }
+
+    /* scroll indicator */
+    .scroll-hint {
+      position: absolute; bottom: 3vh; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      color: var(--grey); font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .scroll-line {
+      width: 1px; height: 50px; background: var(--grey);
+      animation: scrollDown 1.8s ease-in-out infinite;
+    }
+    @keyframes scrollDown {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: top; }
+      51%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    /* ── PANEL 2 — NUMBERS ── */
+    #p2 {
+      background: var(--accent);
+      justify-content: center; align-items: center;
+      padding: 8vh 4%;
+    }
+    .numbers-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; width: 100%;
+    }
+    .num-item {
+      padding: 3rem 2.5rem;
+      border-right: 1px solid rgba(5,5,7,0.15);
+    }
+    .num-item:last-child { border-right: none; }
+    .num-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 7vw, 8rem);
+      color: var(--black); line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .num-label { font-size: 0.82rem; color: rgba(5,5,7,0.6); font-weight: 500; letter-spacing: 0.05em; }
+
+    /* ── PANEL 3 — STATEMENT ── */
+    #p3 {
+      background: var(--dim);
+      justify-content: center;
+      padding: 10vh 4%;
+    }
+    .statement {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(2.2rem, 4.5vw, 5rem);
+      line-height: 1.2; max-width: 900px;
+      color: var(--white);
+    }
+    .statement em { font-style: italic; color: var(--accent); }
+    .statement .muted { color: var(--grey); }
+
+    /* ── PANEL 4 — EXPERTISE ── */
+    #p4 { background: var(--black); padding: 10vh 4%; justify-content: center; }
+    .exp-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 5rem;
+    }
+    .exp-tag { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
+    .exp-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 6vw, 7rem); line-height: 1; }
+    .exp-count { font-size: 0.78rem; color: var(--grey); align-self: flex-end; }
+
+    .exp-list { width: 100%; }
+    .exp-row {
+      display: grid; grid-template-columns: 60px 1fr 1fr auto;
+      align-items: center; gap: 2rem;
+      padding: 2rem 0;
+      border-top: 1px solid var(--border);
+      transition: background 0.3s;
+      cursor: default;
+    }
+    .exp-row:last-child { border-bottom: 1px solid var(--border); }
+    .exp-row:hover .exp-row-title { color: var(--accent); }
+    .exp-num { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--grey); }
+    .exp-row-title { font-family: 'Instrument Serif', serif; font-size: clamp(1.4rem, 2.5vw, 2.2rem); transition: color 0.3s; }
+    .exp-row-desc { color: var(--grey); font-size: 0.85rem; line-height: 1.7; font-weight: 300; }
+    .exp-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
+    .exp-chip {
+      padding: 0.3rem 0.7rem; border-radius: 50px;
+      border: 1px solid var(--border);
+      font-size: 0.7rem; color: var(--grey); white-space: nowrap;
+    }
+
+    /* ── PANEL 5 — WORK / PORTFOLIO ── */
+    #p5 { background: var(--dim); padding: 10vh 4%; justify-content: center; min-height: auto; }
+    .work-header { margin-bottom: 4rem; }
+    .work-tag { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
+    .work-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 6vw, 7rem); line-height: 1; }
+
+    .work-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+    .work-card {
+      background: var(--dim); padding: 3rem 2.5rem;
+      position: relative; overflow: hidden;
+      transition: background 0.4s;
+    }
+    .work-card:hover { background: #1a1a1f; }
+    .work-card::after {
+      content: '↗';
+      position: absolute; top: 2rem; right: 2rem;
+      font-size: 1.2rem; color: var(--accent);
+      opacity: 0; transition: opacity 0.3s, transform 0.3s;
+      transform: translate(-4px, 4px);
+    }
+    .work-card:hover::after { opacity: 1; transform: translate(0,0); }
+    .work-num { font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; color: var(--grey); letter-spacing: 0.1em; margin-bottom: 2rem; }
+    .work-card h3 { font-family: 'Instrument Serif', serif; font-size: clamp(1.5rem, 2.2vw, 2rem); margin-bottom: 0.8rem; }
+    .work-card p { color: var(--grey); font-size: 0.85rem; line-height: 1.7; font-weight: 300; margin-bottom: 1.5rem; }
+    .work-link { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-decoration: none; }
+    .work-link:hover { text-decoration: underline; }
+
+    /* ── PANEL 6 — MARQUEE ── */
+    #p6 {
+      background: var(--accent); min-height: auto;
+      padding: 3rem 0; overflow: hidden;
+      display: flex; align-items: center; justify-content: flex-start;
+    }
+    .marquee-track {
+      display: flex; gap: 3rem; white-space: nowrap;
+      animation: marquee 20s linear infinite;
+    }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .marquee-item {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--black); letter-spacing: 0.05em;
+      display: flex; align-items: center; gap: 3rem;
+    }
+    .marquee-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(5,5,7,0.3); flex-shrink: 0; }
+
+    /* ── PANEL 7 — CONTACT ── */
+    #p7 { background: var(--black); justify-content: center; padding: 12vh 4%; }
+    .contact-label { font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent); margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; }
+    .contact-label::before { content:''; width:30px; height:1px; background:var(--accent); }
+    .contact-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 10vw, 12rem);
+      line-height: 0.9; color: var(--white);
+      margin-bottom: 4rem;
+    }
+    .contact-big a { color: inherit; text-decoration: none; transition: color 0.3s; }
+    .contact-big a:hover { color: var(--accent); }
+    .contact-row {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding-top: 2rem; border-top: 1px solid var(--border);
+    }
+    .contact-links { display: flex; gap: 2rem; }
+    .contact-links a {
+      font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--grey); text-decoration: none; transition: color 0.3s;
+    }
+    .contact-links a:hover { color: var(--white); }
+    .contact-copy { font-size: 0.75rem; color: var(--grey); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black); padding: 1.5rem 4%;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer span { font-size: 0.72rem; color: var(--grey); letter-spacing: 0.08em; }
+    footer a { font-size: 0.72rem; color: var(--grey); text-decoration: none; letter-spacing: 0.08em; }
+    footer a:hover { color: var(--white); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .numbers-grid { grid-template-columns: 1fr 1fr; }
+      .num-item { border-right: none; border-bottom: 1px solid rgba(5,5,7,0.15); }
+      .work-grid { grid-template-columns: 1fr; }
+      .exp-row { grid-template-columns: 40px 1fr; }
+      .exp-row-desc, .exp-tags { display: none; }
+      .hero-bottom { flex-direction: column; gap: 2rem; align-items: flex-start; }
+      .contact-row { flex-direction: column; gap: 1.5rem; align-items: flex-start; }
+      body { cursor: auto; }
+      .cursor, .cursor-ring { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#p1" class="nav-logo">Madhav Arora</a>
+  <ul class="nav-right">
+    <li><a href="#p4">Expertise</a></li>
+    <li><a href="#p5">Work</a></li>
+    <li><a href="#p7">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ── PANEL 1 · HERO ── -->
+<section class="panel" id="p1">
+  <div>
+    <div class="hero-eyebrow">Financial Analyst &amp; Strategist</div>
+    <div class="hero-headline">
+      Making<br>
+      <span class="italic">Money</span><br>
+      Make Sense.
+    </div>
+    <div class="hero-bottom">
+      <p class="hero-desc">
+        I turn complex financial data into decisions that move organisations forward. Specialising in financial modelling, investment analysis, and data-driven strategy.
+      </p>
+      <a href="#p5" class="hero-cta">View My Work <span class="arrow">↗</span></a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- ── PANEL 2 · NUMBERS ── -->
+<section class="panel" id="p2">
+  <div class="numbers-grid">
+    <div class="num-item">
+      <div class="num-big" data-target="3">0</div>
+      <div class="num-label">Years of Experience</div>
+    </div>
+    <div class="num-item">
+      <div class="num-big" data-target="20">0</div>
+      <div class="num-label">Projects Delivered</div>
+    </div>
+    <div class="num-item">
+      <div class="num-big" data-target="5">0</div>
+      <div class="num-label">Certifications Earned</div>
+    </div>
+    <div class="num-item">
+      <div class="num-big" data-target="98">0</div>
+      <div class="num-label">% Client Satisfaction</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PANEL 3 · STATEMENT ── -->
+<section class="panel" id="p3">
+  <p class="statement">
+    <span class="muted">Finance is not about numbers.</span><br>
+    It is about <em>clarity</em> — the kind that turns<br>
+    <span class="muted">uncertainty into</span> confident decisions.
+  </p>
+</section>
+
+<!-- ── PANEL 4 · EXPERTISE ── -->
+<section class="panel" id="p4">
+  <div class="exp-header">
+    <div>
+      <div class="exp-tag">What I Do</div>
+      <div class="exp-title">Expertise</div>
+    </div>
+    <div class="exp-count">05 Disciplines</div>
+  </div>
+  <div class="exp-list">
+    <div class="exp-row">
+      <div class="exp-num">01</div>
+      <div class="exp-row-title">Financial Modelling</div>
+      <div class="exp-row-desc">3-statement models, DCF valuations, LBO analysis, and scenario planning built to institutional standard.</div>
+      <div class="exp-tags"><span class="exp-chip">Excel</span><span class="exp-chip">VBA</span><span class="exp-chip">DCF</span></div>
+    </div>
+    <div class="exp-row">
+      <div class="exp-num">02</div>
+      <div class="exp-row-title">FP&amp;A &amp; Reporting</div>
+      <div class="exp-row-desc">Budget vs actuals, variance analysis, board-ready reports and automated monthly close processes.</div>
+      <div class="exp-tags"><span class="exp-chip">Power BI</span><span class="exp-chip">SQL</span><span class="exp-chip">DAX</span></div>
+    </div>
+    <div class="exp-row">
+      <div class="exp-num">03</div>
+      <div class="exp-row-title">Investment Analysis</div>
+      <div class="exp-row-desc">Equity research, fundamental valuation, portfolio construction, and risk-adjusted return optimisation.</div>
+      <div class="exp-tags"><span class="exp-chip">Bloomberg</span><span class="exp-chip">Python</span><span class="exp-chip">R</span></div>
+    </div>
+    <div class="exp-row">
+      <div class="exp-num">04</div>
+      <div class="exp-row-title">Data Analytics</div>
+      <div class="exp-row-desc">Transforming raw financial datasets into interactive dashboards and predictive models.</div>
+      <div class="exp-tags"><span class="exp-chip">Tableau</span><span class="exp-chip">Python</span><span class="exp-chip">SQL</span></div>
+    </div>
+    <div class="exp-row">
+      <div class="exp-num">05</div>
+      <div class="exp-row-title">Strategic Advisory</div>
+      <div class="exp-row-desc">Business case development, M&amp;A support, cost optimisation, and executive-level storytelling.</div>
+      <div class="exp-tags"><span class="exp-chip">Strategy</span><span class="exp-chip">PowerPoint</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PANEL 5 · WORK ── -->
+<section class="panel" id="p5">
+  <div class="work-header">
+    <div class="work-tag">Selected Work</div>
+    <div class="work-title">Portfolio</div>
+  </div>
+  <div class="work-grid">
+    <div class="work-card">
+      <div class="work-num">Project — 01</div>
+      <h3>3-Statement Financial Model</h3>
+      <p>Fully integrated P&amp;L, balance sheet, and cash flow model with scenario analysis, sensitivity tables, and automated charts.</p>
+      <a href="PASTE-GOOGLE-DRIVE-LINK" class="work-link">View File</a>
+    </div>
+    <div class="work-card">
+      <div class="work-num">Project — 02</div>
+      <h3>Executive KPI Dashboard</h3>
+      <p>Power BI dashboard tracking revenue, EBITDA margin, working capital, and cashflow KPIs for C-suite reporting.</p>
+      <a href="PASTE-GOOGLE-DRIVE-LINK" class="work-link">View File</a>
+    </div>
+    <div class="work-card">
+      <div class="work-num">Project — 03</div>
+      <h3>Equity Research Report</h3>
+      <p>Initiated coverage on a FTSE 250 company with a Buy recommendation, supported by fundamental and DCF valuation.</p>
+      <a href="PASTE-GOOGLE-DRIVE-LINK" class="work-link">View File</a>
+    </div>
+    <div class="work-card">
+      <div class="work-num">Project — 04</div>
+      <h3>Budget Variance Analysis</h3>
+      <p>Monthly budget vs actuals with automated exception flagging, waterfall charts, and management commentary templates.</p>
+      <a href="PASTE-GOOGLE-DRIVE-LINK" class="work-link">View File</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── PANEL 6 · MARQUEE ── -->
+<section class="panel" id="p6">
+  <div class="marquee-track" id="marqueeTrack">
+    <div class="marquee-item">Financial Modelling <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Investment Analysis <span class="marquee-dot"></span></div>
+    <div class="marquee-item">FP&amp;A Reporting <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Data Analytics <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Strategic Advisory <span class="marquee-dot"></span></div>
+    <div class="marquee-item">DCF Valuation <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Power BI Dashboards <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Excel VBA <span class="marquee-dot"></span></div>
+    <!-- duplicated for seamless loop -->
+    <div class="marquee-item">Financial Modelling <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Investment Analysis <span class="marquee-dot"></span></div>
+    <div class="marquee-item">FP&amp;A Reporting <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Data Analytics <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Strategic Advisory <span class="marquee-dot"></span></div>
+    <div class="marquee-item">DCF Valuation <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Power BI Dashboards <span class="marquee-dot"></span></div>
+    <div class="marquee-item">Excel VBA <span class="marquee-dot"></span></div>
+  </div>
+</section>
+
+<!-- ── PANEL 7 · CONTACT ── -->
+<section class="panel" id="p7">
+  <div class="contact-label">Get In Touch</div>
+  <div class="contact-big">
+    <a href="mailto:youremail@example.com">Let's<br>Talk.</a>
+  </div>
+  <div class="contact-row">
+    <div class="contact-links">
+      <a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+      <a href="https://github.com/MadhavArora77" target="_blank">GitHub</a>
+      <a href="your-cv.pdf" target="_blank">Download CV</a>
+    </div>
+    <div class="contact-copy">Open to full-time roles &amp; freelance projects</div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Madhav Arora</span>
+  <a href="index.html">← Back to Main Portfolio</a>
+</footer>
+
+<script>
+  // ── CURSOR ──
+  const cursor = document.getElementById('cursor');
+  const ring   = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
+  function animateRing() {
+    rx += (mx-rx)*0.12; ry += (my-ry)*0.12;
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+  document.querySelectorAll('a, .exp-row, .work-card').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.width='16px'; cursor.style.height='16px'; ring.style.width='56px'; ring.style.height='56px'; });
+    el.addEventListener('mouseleave', () => { cursor.style.width='10px'; cursor.style.height='10px'; ring.style.width='36px'; ring.style.height='36px'; });
+  });
+
+  // ── COUNT UP NUMBERS ──
+  function countUp(el, target, duration=1800) {
+    let start=0, startTime=null;
+    function step(ts) {
+      if (!startTime) startTime=ts;
+      const progress = Math.min((ts-startTime)/duration, 1);
+      const ease = 1 - Math.pow(1-progress, 3);
+      el.textContent = Math.floor(ease*target) + (target===98 ? '%' : '+');
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = target + (target===98 ? '%' : '+');
+    }
+    requestAnimationFrame(step);
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('[data-target]').forEach(el => {
+          countUp(el, parseInt(el.dataset.target));
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('#p2').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
