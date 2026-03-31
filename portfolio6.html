@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Madhav Arora — Financial Analyst</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --black:  #050507;
+      --white:  #F0EDE8;
+      --grey:   #6B6B6B;
+      --accent: #C8A96E;
+      --dim:    #0D0D10;
+      --border: rgba(240,237,232,0.08);
+    }
+
+    html { scroll-behavior: auto; }
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CURSOR ── */
+    .cursor { position:fixed; width:10px; height:10px; background:var(--accent); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .3s,height .3s; }
+    .cursor-ring { position:fixed; width:36px; height:36px; border:1px solid rgba(200,169,110,0.45); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); }
+
+    /* ── NAV ── */
+    nav {
+      position:fixed; top:0; width:100%; z-index:600;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:1.4rem 4%;
+      background:rgba(5,5,7,0.92); border-bottom:1px solid var(--border); backdrop-filter:blur(10px);
+    }
+    .nav-logo { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:.15em; color:var(--white); text-decoration:none; }
+    .nav-right { display:flex; gap:2.5rem; list-style:none; }
+    .nav-right a { color:rgba(240,237,232,0.5); text-decoration:none; font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; font-weight:500; transition:color .3s; }
+    .nav-right a:hover { color:var(--white); }
+
+    /* ══════════════════════════════════
+       SCROLL-JACKED INTRO
+    ══════════════════════════════════ */
+
+    /* tall spacer that gives scroll room for the animation */
+    #intro-spacer { height: 600vh; }
+
+    #intro-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+      background: var(--black);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* background grid */
+    #intro-sticky::before {
+      content:'';
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(200,169,110,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,169,110,0.04) 1px, transparent 1px);
+      background-size:60px 60px;
+      pointer-events:none;
+    }
+
+    /* ── CHART CANVAS ── */
+    #intro-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── CHANGING TEXT STAGES ── */
+    .intro-stage {
+      position: absolute;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      width: 100%;
+      padding: 0 6%;
+    }
+
+    .stage-eyebrow {
+      font-size: .72rem; letter-spacing:.25em; text-transform:uppercase;
+      color:var(--accent); margin-bottom:1.2rem;
+      display:flex; align-items:center; justify-content:center; gap:.8rem;
+    }
+    .stage-eyebrow::before,.stage-eyebrow::after { content:''; width:30px; height:1px; background:var(--accent); }
+
+    .stage-title {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(4rem,11vw,13rem);
+      line-height:.9; letter-spacing:-.01em; color:var(--white);
+    }
+    .stage-title em { font-family:'Instrument Serif',serif; font-style:italic; color:var(--accent); }
+
+    .stage-sub {
+      margin-top:1.5rem; color:var(--grey);
+      font-size:clamp(.85rem,1.2vw,1rem); font-weight:300; line-height:1.8;
+      max-width:500px; margin-left:auto; margin-right:auto;
+    }
+
+    /* ticker bar at bottom of intro */
+    .intro-ticker {
+      position:absolute; bottom:0; left:0; right:0;
+      background:rgba(200,169,110,0.08);
+      border-top:1px solid rgba(200,169,110,0.2);
+      padding:.7rem 0;
+      display:flex; overflow:hidden;
+    }
+    .ticker-track { display:flex; flex-shrink:0; animation:tickScroll 28s linear infinite; }
+    @keyframes tickScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .ticker-item { display:flex; gap:.7rem; align-items:center; white-space:nowrap; padding:0 2.2rem; border-right:1px solid rgba(200,169,110,0.1); }
+    .ticker-label { font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--grey); }
+    .ticker-val { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--white); }
+    .ticker-chg { font-size:.72rem; font-weight:600; }
+    .up { color:#22C55E; } .dn { color:#EF4444; }
+
+    /* scroll hint */
+    .intro-scroll {
+      position:absolute; bottom:4vh; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:.5rem;
+      color:var(--grey); font-size:.65rem; letter-spacing:.15em; text-transform:uppercase;
+      opacity:0;
+    }
+    .scroll-bar { width:1px; height:40px; background:var(--grey); transform-origin:top; animation:grow 1.8s ease-in-out infinite; }
+    @keyframes grow { 0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(0)} }
+
+    /* ══════════════════════════════════
+       REST OF PAGE (below intro)
+    ══════════════════════════════════ */
+    .page-content { background:var(--black); }
+
+    /* ── PANEL BASE ── */
+    .panel { min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:10vh 4%; position:relative; overflow:hidden; }
+
+    /* ── NUMBERS ── */
+    #p-numbers { background:var(--accent); min-height:auto; padding:0; }
+    .numbers-grid { display:grid; grid-template-columns:repeat(4,1fr); }
+    .num-item { padding:4rem 2.5rem; border-right:1px solid rgba(5,5,7,0.15); }
+    .num-item:last-child { border-right:none; }
+    .num-big { font-family:'Bebas Neue',sans-serif; font-size:clamp(4rem,7vw,9rem); color:var(--black); line-height:1; margin-bottom:.3rem; }
+    .num-label { font-size:.8rem; color:rgba(5,5,7,.55); font-weight:500; letter-spacing:.04em; }
+
+    /* ── STATEMENT ── */
+    #p-statement { background:var(--dim); }
+    .statement { font-family:'Instrument Serif',serif; font-size:clamp(2rem,4vw,4.5rem); line-height:1.25; max-width:900px; }
+    .statement em { font-style:italic; color:var(--accent); }
+    .statement .muted { color:var(--grey); }
+
+    /* ── EXPERTISE ── */
+    #p-expertise { background:var(--black); }
+    .sec-tag { font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:.8rem; }
+    .sec-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,6vw,7rem); line-height:1; margin-bottom:4rem; }
+    .exp-row { display:grid; grid-template-columns:60px 1fr 1fr auto; align-items:center; gap:2rem; padding:2rem 0; border-top:1px solid var(--border); cursor:default; }
+    .exp-row:last-child { border-bottom:1px solid var(--border); }
+    .exp-row:hover .exp-row-title { color:var(--accent); }
+    .exp-num { font-family:'Bebas Neue',sans-serif; font-size:1rem; color:var(--grey); }
+    .exp-row-title { font-family:'Instrument Serif',serif; font-size:clamp(1.3rem,2.2vw,2rem); transition:color .3s; }
+    .exp-row-desc { color:var(--grey); font-size:.85rem; line-height:1.7; font-weight:300; }
+    .exp-chips { display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end; }
+    .exp-chip { padding:.3rem .7rem; border-radius:50px; border:1px solid var(--border); font-size:.7rem; color:var(--grey); white-space:nowrap; }
+
+    /* ── WORK ── */
+    #p-work { background:var(--dim); min-height:auto; padding:8vh 4%; }
+    .work-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); margin-top:3rem; }
+    .work-card { background:var(--dim); padding:3rem 2.5rem; position:relative; overflow:hidden; transition:background .4s; }
+    .work-card:hover { background:#16161b; }
+    .work-card::after { content:'↗'; position:absolute; top:2rem; right:2rem; font-size:1.2rem; color:var(--accent); opacity:0; transition:opacity .3s,transform .3s; transform:translate(-4px,4px); }
+    .work-card:hover::after { opacity:1; transform:translate(0,0); }
+    .work-num { font-family:'Bebas Neue',sans-serif; font-size:.85rem; color:var(--grey); letter-spacing:.1em; margin-bottom:1.5rem; }
+    .work-card h3 { font-family:'Instrument Serif',serif; font-size:clamp(1.4rem,2vw,1.9rem); margin-bottom:.7rem; }
+    .work-card p { color:var(--grey); font-size:.85rem; line-height:1.7; font-weight:300; margin-bottom:1.2rem; }
+    .work-link { font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); text-decoration:none; }
+    .work-link:hover { text-decoration:underline; }
+
+    /* ── MARQUEE ── */
+    #p-marquee { background:var(--accent); min-height:auto; padding:2.5rem 0; overflow:hidden; display:flex; align-items:center; }
+    .marquee-track { display:flex; gap:3rem; white-space:nowrap; animation:marquee 22s linear infinite; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .marquee-item { font-family:'Bebas Neue',sans-serif; font-size:clamp(2rem,3.5vw,3.2rem); color:var(--black); letter-spacing:.05em; display:flex; align-items:center; gap:3rem; }
+    .marquee-dot { width:8px; height:8px; border-radius:50%; background:rgba(5,5,7,.25); flex-shrink:0; }
+
+    /* ── CONTACT ── */
+    #p-contact { background:var(--black); }
+    .contact-label { font-size:.72rem; letter-spacing:.25em; text-transform:uppercase; color:var(--accent); margin-bottom:2rem; display:flex; align-items:center; gap:.8rem; }
+    .contact-label::before { content:''; width:30px; height:1px; background:var(--accent); }
+    .contact-big { font-family:'Bebas Neue',sans-serif; font-size:clamp(3.5rem,10vw,12rem); line-height:.9; margin-bottom:4rem; }
+    .contact-big a { color:var(--white); text-decoration:none; transition:color .3s; }
+    .contact-big a:hover { color:var(--accent); }
+    .contact-row { display:flex; justify-content:space-between; align-items:flex-end; padding-top:2rem; border-top:1px solid var(--border); }
+    .contact-links { display:flex; gap:2rem; }
+    .contact-links a { font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--grey); text-decoration:none; transition:color .3s; }
+    .contact-links a:hover { color:var(--white); }
+    .contact-copy { font-size:.75rem; color:var(--grey); }
+
+
+    /* ── CLIENT FEEDBACK ── */
+    #p-feedback { background:var(--dim); min-height:auto; padding:8vh 4%; }
+    .feedback-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:3rem; }
+    .fb-card { background:var(--black); border:1px solid var(--border); border-radius:16px; padding:2.2rem; transition:border-color .3s; }
+    .fb-card:hover { border-color:rgba(200,169,110,0.35); }
+    .fb-stars { display:flex; gap:.25rem; margin-bottom:1rem; }
+    .fb-star { color:var(--accent); font-size:.9rem; }
+    .fb-quote { font-family:'Instrument Serif',serif; font-style:italic; font-size:1rem; line-height:1.75; color:var(--white); margin-bottom:1.8rem; }
+    .fb-author { display:flex; align-items:center; gap:.9rem; border-top:1px solid var(--border); padding-top:1.2rem; }
+    .fb-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--accent),rgba(200,169,110,0.25)); display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:.95rem; color:var(--black); flex-shrink:0; }
+    .fb-name { font-size:.85rem; font-weight:500; color:var(--white); margin-bottom:.1rem; }
+    .fb-role { font-size:.7rem; color:var(--grey); }
+    @media(max-width:900px){ .feedback-grid { grid-template-columns:1fr; } }
+    /* ── FOOTER ── */
+    footer { background:var(--black); padding:1.5rem 4%; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer span { font-size:.72rem; color:var(--grey); }
+    footer a { font-size:.72rem; color:var(--grey); text-decoration:none; }
+    footer a:hover { color:var(--white); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      .numbers-grid { grid-template-columns:1fr 1fr; }
+      .num-item { border-right:none; border-bottom:1px solid rgba(5,5,7,.15); }
+      .work-grid { grid-template-columns:1fr; }
+      .exp-row { grid-template-columns:40px 1fr; }
+      .exp-row-desc,.exp-chips { display:none; }
+      .contact-row { flex-direction:column; gap:1.5rem; align-items:flex-start; }
+      body { cursor:auto; }
+      .cursor,.cursor-ring { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#" class="nav-logo">Madhav Arora</a>
+  <ul class="nav-right">
+    <li><a href="#p-expertise">Expertise</a></li>
+    <li><a href="#p-work">Work</a></li>
+    <li><a href="#p-contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════════════════════════════
+     SCROLL-JACKED INTRO SECTION
+══════════════════════════════════ -->
+<div id="intro-spacer">
+  <div id="intro-sticky">
+
+    <!-- Canvas for the animated chart -->
+    <canvas id="intro-canvas"></canvas>
+
+    <!-- STAGE 1: Who am I -->
+    <div class="intro-stage" id="stage1">
+      <div class="stage-eyebrow">Financial Analyst</div>
+      <div class="stage-title">Making<br><em>Money</em><br>Make Sense.</div>
+    </div>
+
+    <!-- STAGE 2: What I do -->
+    <div class="intro-stage" id="stage2">
+      <div class="stage-eyebrow">What I Do</div>
+      <div class="stage-title">Data<br>Into<br><em>Decisions.</em></div>
+      <div class="stage-sub">I transform raw financial data into clear strategies that move organisations forward.</div>
+    </div>
+
+    <!-- STAGE 3: The number -->
+    <div class="intro-stage" id="stage3">
+      <div class="stage-eyebrow">Track Record</div>
+      <div class="stage-title"><em>20+</em><br>Projects<br>Delivered.</div>
+      <div class="stage-sub">From 3-statement models to executive dashboards — built to institutional standard.</div>
+    </div>
+
+    <!-- STAGE 4: Call to action -->
+    <div class="intro-stage" id="stage4">
+      <div class="stage-eyebrow">Ready to Work Together</div>
+      <div class="stage-title">Let's<br>Build<br><em>Value.</em></div>
+      <div class="stage-sub">Scroll down to explore my expertise and portfolio.</div>
+    </div>
+
+    <!-- Ticker bar -->
+    <div class="intro-ticker" id="intro-ticker">
+      <div class="ticker-track">
+        <div class="ticker-item"><span class="ticker-label">S&amp;P 500</span><span class="ticker-val">5,218</span><span class="ticker-chg up">▲ 0.82%</span></div>
+        <div class="ticker-item"><span class="ticker-label">FTSE 100</span><span class="ticker-val">8,321</span><span class="ticker-chg up">▲ 0.47%</span></div>
+        <div class="ticker-item"><span class="ticker-label">10Y Treasury</span><span class="ticker-val">4.23%</span><span class="ticker-chg dn">▼ 0.04%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Gold</span><span class="ticker-val">$2,341</span><span class="ticker-chg up">▲ 1.12%</span></div>
+        <div class="ticker-item"><span class="ticker-label">GBP/USD</span><span class="ticker-val">1.2734</span><span class="ticker-chg dn">▼ 0.21%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Nasdaq</span><span class="ticker-val">18,239</span><span class="ticker-chg up">▲ 1.04%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Dow Jones</span><span class="ticker-val">39,118</span><span class="ticker-chg dn">▼ 0.33%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Bitcoin</span><span class="ticker-val">$67,420</span><span class="ticker-chg up">▲ 2.31%</span></div>
+        <div class="ticker-item"><span class="ticker-label">EUR/USD</span><span class="ticker-val">1.0821</span><span class="ticker-chg up">▲ 0.15%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Silver</span><span class="ticker-val">$27.84</span><span class="ticker-chg up">▲ 0.67%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Oil WTI</span><span class="ticker-val">$82.14</span><span class="ticker-chg dn">▼ 0.45%</span></div>
+      </div>
+      <div class="ticker-track" aria-hidden="true">
+        <div class="ticker-item"><span class="ticker-label">S&amp;P 500</span><span class="ticker-val">5,218</span><span class="ticker-chg up">▲ 0.82%</span></div>
+        <div class="ticker-item"><span class="ticker-label">FTSE 100</span><span class="ticker-val">8,321</span><span class="ticker-chg up">▲ 0.47%</span></div>
+        <div class="ticker-item"><span class="ticker-label">10Y Treasury</span><span class="ticker-val">4.23%</span><span class="ticker-chg dn">▼ 0.04%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Gold</span><span class="ticker-val">$2,341</span><span class="ticker-chg up">▲ 1.12%</span></div>
+        <div class="ticker-item"><span class="ticker-label">GBP/USD</span><span class="ticker-val">1.2734</span><span class="ticker-chg dn">▼ 0.21%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Nasdaq</span><span class="ticker-val">18,239</span><span class="ticker-chg up">▲ 1.04%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Dow Jones</span><span class="ticker-val">39,118</span><span class="ticker-chg dn">▼ 0.33%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Bitcoin</span><span class="ticker-val">$67,420</span><span class="ticker-chg up">▲ 2.31%</span></div>
+        <div class="ticker-item"><span class="ticker-label">EUR/USD</span><span class="ticker-val">1.0821</span><span class="ticker-chg up">▲ 0.15%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Silver</span><span class="ticker-val">$27.84</span><span class="ticker-chg up">▲ 0.67%</span></div>
+        <div class="ticker-item"><span class="ticker-label">Oil WTI</span><span class="ticker-val">$82.14</span><span class="ticker-chg dn">▼ 0.45%</span></div>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="intro-scroll" id="intro-scroll-hint">
+      <div class="scroll-bar"></div>
+      Scroll
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     REST OF PAGE
+══════════════════════════════════ -->
+<div class="page-content">
+
+  <!-- NUMBERS -->
+  <div id="p-numbers">
+    <div class="numbers-grid">
+      <div class="num-item"><div class="num-big" data-target="3">0</div><div class="num-label">Years Experience</div></div>
+      <div class="num-item"><div class="num-big" data-target="20">0</div><div class="num-label">Projects Delivered</div></div>
+      <div class="num-item"><div class="num-big" data-target="5">0</div><div class="num-label">Certifications</div></div>
+      <div class="num-item"><div class="num-big" data-target="98">0</div><div class="num-label">% Client Satisfaction</div></div>
+    </div>
+  </div>
+
+  <!-- STATEMENT -->
+  <section class="panel" id="p-statement">
+    <p class="statement">
+      <span class="muted">Finance is not about numbers.</span><br>
+      It is about <em>clarity</em> — the kind<br>
+      <span class="muted">that turns uncertainty into</span><br>
+      confident decisions.
+    </p>
+  </section>
+
+  <!-- EXPERTISE -->
+  <section class="panel" id="p-expertise">
+    <div class="sec-tag">What I Do</div>
+    <div class="sec-title">Expertise</div>
+    <div>
+      <div class="exp-row">
+        <div class="exp-num">01</div>
+        <div class="exp-row-title">Financial Modelling</div>
+        <div class="exp-row-desc">3-statement models, DCF valuations, LBO analysis and scenario planning built to institutional standard.</div>
+        <div class="exp-chips"><span class="exp-chip">Excel</span><span class="exp-chip">VBA</span><span class="exp-chip">DCF</span></div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-num">02</div>
+        <div class="exp-row-title">FP&amp;A &amp; Reporting</div>
+        <div class="exp-row-desc">Budget vs actuals, variance analysis, board-ready reports and automated monthly close processes.</div>
+        <div class="exp-chips"><span class="exp-chip">Power BI</span><span class="exp-chip">SQL</span><span class="exp-chip">DAX</span></div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-num">03</div>
+        <div class="exp-row-title">Investment Analysis</div>
+        <div class="exp-row-desc">Equity research, fundamental valuation, portfolio construction and risk-adjusted return optimisation.</div>
+        <div class="exp-chips"><span class="exp-chip">Bloomberg</span><span class="exp-chip">Python</span><span class="exp-chip">R</span></div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-num">04</div>
+        <div class="exp-row-title">Data Analytics</div>
+        <div class="exp-row-desc">Transforming raw financial datasets into interactive dashboards and predictive models.</div>
+        <div class="exp-chips"><span class="exp-chip">Tableau</span><span class="exp-chip">Python</span><span class="exp-chip">SQL</span></div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-num">05</div>
+        <div class="exp-row-title">Strategic Advisory</div>
+        <div class="exp-row-desc">Business case development, M&amp;A support, cost optimisation and executive-level storytelling.</div>
+        <div class="exp-chips"><span class="exp-chip">Strategy</span><span class="exp-chip">PowerPoint</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section id="p-work">
+    <div class="sec-tag">Selected Work</div>
+    <div class="sec-title">Portfolio</div>
+    <div class="work-grid">
+      <div class="work-card">
+        <div class="work-num">Project — 01</div>
+        <h3>3-Statement Financial Model</h3>
+        <p>Fully integrated P&amp;L, balance sheet, and cash flow model with scenario analysis and sensitivity tables.</p>
+        <a href="PASTE-GOOGLE-DRIVE-LINK" class="work-link">View File</a>
+      </div>
+      <div class="work-card">
+        <div class="work-num">Project — 02</div>
+        <h3>Executive KPI Dashboard</h3>
+        <p>Power BI dashboard tracking revenue, EBITDA margin and cashflow KPIs for C-suite reporting.</p>
+        <a href="PASTE-GOOGLE-DRIVE-LINK" class="work-link">View File</a>
+      </div>
+      <div class="work-card">
+        <div class="work-num">Project — 03</div>
+        <h3>Equity Research Report</h3>
+        <p>Initiated coverage on a FTSE 250 company with a Buy recommendation supported by DCF valuation.</p>
+        <a href="PASTE-GOOGLE-DRIVE-LINK" class="work-link">View File</a>
+      </div>
+      <div class="work-card">
+        <div class="work-num">Project — 04</div>
+        <h3>Budget Variance Analysis</h3>
+        <p>Monthly budget vs actuals with automated exception flagging, waterfall charts and commentary templates.</p>
+        <a href="PASTE-GOOGLE-DRIVE-LINK" class="work-link">View File</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div id="p-marquee">
+    <div class="marquee-track">
+      <div class="marquee-item">Financial Modelling <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Investment Analysis <span class="marquee-dot"></span></div>
+      <div class="marquee-item">FP&amp;A Reporting <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Data Analytics <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Strategic Advisory <span class="marquee-dot"></span></div>
+      <div class="marquee-item">DCF Valuation <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Power BI Dashboards <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Excel VBA <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Financial Modelling <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Investment Analysis <span class="marquee-dot"></span></div>
+      <div class="marquee-item">FP&amp;A Reporting <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Data Analytics <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Strategic Advisory <span class="marquee-dot"></span></div>
+      <div class="marquee-item">DCF Valuation <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Power BI Dashboards <span class="marquee-dot"></span></div>
+      <div class="marquee-item">Excel VBA <span class="marquee-dot"></span></div>
+    </div>
+  </div>
+
+  <!-- CLIENT FEEDBACK -->
+  <section id="p-feedback">
+    <div class="sec-tag">What People Say</div>
+    <div class="sec-title">Client Feedback</div>
+    <div class="feedback-grid">
+      <div class="fb-card">
+        <div class="fb-stars"><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span></div>
+        <p class="fb-quote">Madhav built our 3-statement model from scratch. The scenario analysis was exactly what our board needed — clear, intuitive and completely bulletproof.</p>
+        <div class="fb-author"><div class="fb-avatar">JR</div><div><div class="fb-name">James Richardson</div><div class="fb-role">CFO · TechScale Ventures</div></div></div>
+      </div>
+      <div class="fb-card">
+        <div class="fb-stars"><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span></div>
+        <p class="fb-quote">The Power BI dashboard transformed how our leadership team consumes financial data. We went from 3-day reporting cycles to real-time visibility.</p>
+        <div class="fb-author"><div class="fb-avatar">SP</div><div><div class="fb-name">Sarah Patel</div><div class="fb-role">Head of Finance · NovaBridge Ltd</div></div></div>
+      </div>
+      <div class="fb-card">
+        <div class="fb-stars"><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span><span class="fb-star">★</span></div>
+        <p class="fb-quote">Outstanding equity research. The DCF model and investment thesis were presented with exceptional clarity — exactly the standard our investment committee needed.</p>
+        <div class="fb-author"><div class="fb-avatar">MT</div><div><div class="fb-name">Michael Torres</div><div class="fb-role">Portfolio Manager · Meridian Capital</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="panel" id="p-contact">
+    <div class="contact-label">Get In Touch</div>
+    <div class="contact-big">
+      <a href="mailto:madhavarora1213@gmail.com">Let's<br>Talk.</a>
+    </div>
+    <div class="contact-row">
+      <div class="contact-links">
+        <a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+        <a href="https://github.com/MadhavArora77" target="_blank">GitHub</a>
+        <a href="your-cv.pdf" target="_blank">Download CV</a>
+      </div>
+      <div class="contact-copy">Open to full-time roles &amp; freelance projects</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 Madhav Arora</span>
+    <a href="index.html">← Back to Main Portfolio</a>
+  </footer>
+
+</div><!-- end page-content -->
+
+<script>
+/* ══════════════
+   CANVAS CHART
+══════════════ */
+const canvas  = document.getElementById('intro-canvas');
+const ctx     = canvas.getContext('2d');
+const chartPoints = [0.55,0.52,0.58,0.54,0.60,0.57,0.63,0.59,0.66,0.62,0.70,0.67,0.74,0.71,0.78,0.75,0.82,0.79,0.86,0.83,0.90,0.87,0.93,0.89,0.95,0.92,0.97,0.94,0.99,0.96];
+let drawProgress = 0;
+
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', ()=>{ resizeCanvas(); drawChart(); });
+
+function drawChart() {
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if(drawProgress<=0) return;
+  const padX=W*0.08, padY=H*0.20, chartW=W-padX*2, chartH=H-padY*2;
+  const totalPoints=chartPoints.length;
+  const visibleCount=Math.max(2,Math.floor(drawProgress*totalPoints));
+  const points=chartPoints.slice(0,visibleCount);
+  // grid
+  ctx.strokeStyle='rgba(200,169,110,0.06)'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=padY+(chartH/4)*i;ctx.beginPath();ctx.moveTo(padX,y);ctx.lineTo(padX+chartW,y);ctx.stroke();}
+  for(let i=0;i<=6;i++){const x=padX+(chartW/6)*i;ctx.beginPath();ctx.moveTo(x,padY);ctx.lineTo(x,padY+chartH);ctx.stroke();}
+  // fill
+  const gradient=ctx.createLinearGradient(0,padY,0,padY+chartH);
+  gradient.addColorStop(0,'rgba(200,169,110,0.18)'); gradient.addColorStop(1,'rgba(200,169,110,0)');
+  ctx.beginPath();
+  points.forEach((pt,i)=>{const x=padX+(i/(totalPoints-1))*chartW,y=padY+chartH-pt*chartH;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  const lastX=padX+((points.length-1)/(totalPoints-1))*chartW;
+  ctx.lineTo(lastX,padY+chartH);ctx.lineTo(padX,padY+chartH);ctx.closePath();
+  ctx.fillStyle=gradient;ctx.fill();
+  // line
+  ctx.beginPath();ctx.strokeStyle='#C8A96E';
+  ctx.lineWidth=Math.max(2,W*0.003);ctx.lineJoin='round';ctx.lineCap='round';
+  points.forEach((pt,i)=>{const x=padX+(i/(totalPoints-1))*chartW,y=padY+chartH-pt*chartH;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+  // glowing tip dot
+  if(points.length>=2){
+    const tipX=padX+((points.length-1)/(totalPoints-1))*chartW;
+    const tipY=padY+chartH-points[points.length-1]*chartH;
+    const grd=ctx.createRadialGradient(tipX,tipY,0,tipX,tipY,18);
+    grd.addColorStop(0,'rgba(200,169,110,0.5)');grd.addColorStop(1,'rgba(200,169,110,0)');
+    ctx.beginPath();ctx.arc(tipX,tipY,18,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+    ctx.beginPath();ctx.arc(tipX,tipY,5,0,Math.PI*2);ctx.fillStyle='#C8A96E';ctx.fill();
+  }
+}
+drawChart();
+
+/* ══════════════
+   SCROLL — pure JS (no GSAP)
+══════════════ */
+const introSpacer = document.getElementById('intro-spacer');
+const stageIds    = ['stage1','stage2','stage3','stage4'];
+
+function showStage(n) {
+  stageIds.forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.style.opacity   = i===n ? '1' : '0';
+    el.style.transform = i===n ? 'translateY(0px)' : 'translateY(18px)';
+  });
+}
+
+// set transitions once
+stageIds.forEach(id => {
+  const el = document.getElementById(id);
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+});
+
+function onScroll() {
+  const sy    = window.pageYOffset;
+  const top   = introSpacer.offsetTop;
+  const range = introSpacer.offsetHeight - window.innerHeight;
+
+  if (range <= 0 || sy <= top) {
+    drawProgress = 0; drawChart(); showStage(0); return;
+  }
+  if (sy >= top + range) {
+    drawProgress = 1; drawChart(); showStage(3); return;
+  }
+
+  const p = (sy - top) / range;
+  drawProgress = p;
+  drawChart();
+
+  if      (p < 0.25) showStage(0);
+  else if (p < 0.50) showStage(1);
+  else if (p < 0.75) showStage(2);
+  else               showStage(3);
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+window.addEventListener('resize', onScroll);
+window.addEventListener('load', () => setTimeout(onScroll, 100));
+showStage(0);
+
+/* ══════════════
+   COUNT UP
+══════════════ */
+function countUp(el, target, duration=1800) {
+  let startTime=null;
+  function step(ts){
+    if(!startTime) startTime=ts;
+    const p=Math.min((ts-startTime)/duration,1);
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=Math.floor(ease*target)+(target===98?'%':'+');
+    if(p<1) requestAnimationFrame(step);
+    else el.textContent=target+(target===98?'%':'+');
+  }
+  requestAnimationFrame(step);
+}
+const numsObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      document.querySelectorAll('[data-target]').forEach(el => countUp(el, parseInt(el.dataset.target)));
+      numsObs.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+numsObs.observe(document.getElementById('p-numbers'));
+
+/* ══════════════
+   CURSOR
+══════════════ */
+const cur  = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0, my=0, rx=0, ry=0, cursorOn=false;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx + 'px';
+  cur.style.top  = my + 'px';
+  if (!cursorOn) {
+    cur.style.opacity  = '1';
+    ring.style.opacity = '1';
+    cursorOn = true;
+  }
+});
+
+(function loop() {
+  rx += (mx - rx) * 0.11;
+  ry += (my - ry) * 0.11;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(loop);
+})();
+
+document.addEventListener('mouseleave', () => {
+  cur.style.opacity = '0';
+  ring.style.opacity = '0';
+  cursorOn = false;
+});
+document.addEventListener('mouseenter', () => {
+  if (cursorOn) { cur.style.opacity='1'; ring.style.opacity='1'; }
+});
+
+document.querySelectorAll('a, .exp-row, .work-card, .fb-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cur.style.width  = '0px'; cur.style.height = '0px';
+    ring.style.width = '54px'; ring.style.height = '54px';
+    ring.style.borderColor = 'rgba(200,169,110,1)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cur.style.width  = '10px'; cur.style.height = '10px';
+    ring.style.width = '38px'; ring.style.height = '38px';
+    ring.style.borderColor = 'rgba(200,169,110,0.5)';
+  });
+});
+</script>
+</body>
+</html>
