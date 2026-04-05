@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diageo plc — Madhav Arora</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:      #111318;   /* slightly lighter than pure black */
+      --bg2:     #191C24;   /* cards and sections */
+      --bg3:     #1E2130;   /* hover state */
+      --white:   #F0EDE8;
+      --grey:    #8A8A96;
+      --light:   #C4C0B8;
+      --accent:  #C8A96E;
+      --border:  rgba(240,237,232,0.08);
+      --green:   #22C55E;
+      --red:     #EF4444;
+    }
+    html { scroll-behavior: smooth; }
+    body { background:var(--bg); color:var(--white); font-family:'DM Sans',sans-serif; font-weight:300; overflow-x:hidden; line-height:1.7; }
+
+    /* ── NAV ── */
+    nav {
+      position:fixed; top:0; width:100%; z-index:600;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:1.1rem 5%;
+      background:rgba(17,19,24,0.96); border-bottom:1px solid var(--border);
+      backdrop-filter:blur(12px);
+    }
+    .nav-logo { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:.15em; color:var(--white); text-decoration:none; }
+    .nav-back { font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--grey); text-decoration:none; transition:color .3s; }
+    .nav-back:hover { color:var(--accent); }
+
+    /* ══════════════════════════════
+       HERO — background image area
+    ══════════════════════════════ */
+    #hero {
+      min-height: 65vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 8rem 5% 4vh;
+      position: relative; overflow: hidden;
+      border-bottom: 1px solid var(--border);
+
+      /*
+      ════════════════════════════════════════
+      TO ADD YOUR BACKGROUND IMAGE:
+      1. Upload image to GitHub repo
+      2. Uncomment the line below
+      3. Replace "your-image.jpg" with filename
+      ════════════════════════════════════════
+      background-image: url('your-image.jpg');
+      background-size: cover;
+      background-position: center;
+      */
+      background: linear-gradient(135deg, #191C24 0%, #111318 100%);
+    }
+
+    /* overlay — keeps text readable over any image */
+    #hero::before {
+      content:''; position:absolute; inset:0; z-index:0;
+      background: linear-gradient(to top, rgba(17,19,24,1) 0%, rgba(17,19,24,0.6) 60%, rgba(17,19,24,0.3) 100%);
+    }
+    /* subtle grid */
+    #hero::after {
+      content:''; position:absolute; inset:0; z-index:0;
+      background-image:
+        linear-gradient(rgba(200,169,110,0.035) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(200,169,110,0.035) 1px,transparent 1px);
+      background-size:55px 55px; pointer-events:none;
+    }
+    .hero-inner { position:relative; z-index:1; }
+
+    /* sector label */
+    .sector-tag {
+      font-size:.68rem; letter-spacing:.22em; text-transform:uppercase;
+      color:var(--accent); margin-bottom:1rem;
+      display:flex; align-items:center; gap:.7rem;
+    }
+    .sector-tag::before { content:''; width:22px; height:1px; background:var(--accent); }
+
+    /* big company name */
+    .company-name {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(3rem,9vw,10rem);
+      line-height:.88; color:var(--white); margin-bottom:.3rem;
+    }
+
+    /* ticker */
+    .company-ticker {
+      font-size:.85rem; color:var(--grey); margin-bottom:1.8rem;
+      letter-spacing:.08em;
+    }
+
+    /* ── RATING BOX (like the one at top of your report) ── */
+    .rating-box {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      margin-bottom: 1.8rem;
+    }
+    .rating-cell {
+      background: var(--bg2);
+      padding: 1.2rem 1.5rem;
+      text-align: center;
+    }
+    .rating-cell.highlight { background: rgba(200,169,110,0.12); }
+    .r-label { font-size:.6rem; letter-spacing:.15em; text-transform:uppercase; color:var(--grey); margin-bottom:.4rem; }
+    .r-value { font-family:'Bebas Neue',sans-serif; font-size:clamp(1.5rem,3vw,2.5rem); color:var(--white); line-height:1; }
+    .r-value.green { color:var(--green); }
+    .r-value.red   { color:var(--red); }
+    .r-value.gold  { color:var(--accent); }
+
+    /* small stats row */
+    .stats-row {
+      display: flex; flex-wrap: wrap; gap:1.5rem;
+      padding-top:1.2rem; border-top:1px solid var(--border);
+    }
+    .stat-item { font-size:.78rem; color:var(--grey); }
+    .stat-item strong { color:var(--light); font-weight:500; }
+
+    /* ── AUTHOR ROW ── */
+    .author-row {
+      display:flex; align-items:center; gap:.9rem;
+      margin-top:1.8rem; padding-top:1.4rem;
+      border-top:1px solid var(--border);
+    }
+    .author-avatar {
+      width:40px; height:40px; border-radius:50%;
+      border:2px solid rgba(200,169,110,0.35);
+      overflow:hidden; flex-shrink:0; background:var(--bg2);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .author-avatar img { width:100%; height:100%; object-fit:cover; }
+    /* EDIT: Replace "photo.png" with your photo to show image instead of initials */
+    .author-avatar .initials { font-family:'Bebas Neue',sans-serif; font-size:.9rem; color:var(--accent); }
+    .author-name { font-size:.88rem; font-weight:500; color:var(--white); margin-bottom:.15rem; }
+    /* EDIT: Change date and read time */
+    .author-date { font-size:.72rem; color:var(--grey); }
+
+    /* ══════════════════════════════
+       ARTICLE BODY
+    ══════════════════════════════ */
+    article { max-width:800px; margin:0 auto; padding:5vh 5% 8vh; }
+
+    /* ────────────────────────────────────────────────────
+       BUILDING BLOCKS — copy/paste anywhere in the article
+    ──────────────────────────────────────────────────── */
+
+    /* SECTION HEADING */
+    .h2 {
+      font-family:'Instrument Serif',serif;
+      font-size:clamp(1.5rem,3vw,2rem);
+      color:var(--white); margin:3.5rem 0 1rem;
+      padding-top:3.5rem; border-top:1px solid var(--border);
+      line-height:1.2;
+    }
+    .h2:first-child { margin-top:0; padding-top:0; border-top:none; }
+
+    /* SUBHEADING */
+    .h3 { font-size:.95rem; font-weight:600; color:var(--accent); margin:1.6rem 0 .5rem; letter-spacing:.02em; }
+
+    /* PARAGRAPH */
+    .p { font-size:.93rem; line-height:1.9; color:var(--grey); margin-bottom:.9rem; }
+    .p strong { color:var(--white); font-weight:500; }
+    .p em { font-style:italic; color:var(--accent); }
+
+    /* CALLOUT / HIGHLIGHT BOX */
+    .callout {
+      background:var(--bg2); border:1px solid var(--border);
+      border-left:3px solid var(--accent);
+      border-radius:8px; padding:1.4rem 1.8rem; margin:2rem 0;
+      font-family:'Instrument Serif',serif; font-style:italic;
+      font-size:1rem; color:var(--white); line-height:1.75;
+    }
+
+    /* ── SCREENSHOT IMAGE ── */
+    /* Full width */
+    .img-full { margin:2rem 0; }
+    .img-full img { width:100%; border-radius:10px; border:1px solid var(--border); display:block; }
+    .img-caption { font-size:.73rem; color:var(--grey); margin-top:.6rem; text-align:center; font-style:italic; line-height:1.5; }
+
+    /* Half width — image + text side by side */
+    .img-split { display:grid; grid-template-columns:1fr 1fr; gap:2.5rem; align-items:start; margin:2rem 0; }
+    .img-split.flip { direction:rtl; }
+    .img-split.flip > * { direction:ltr; }
+    .img-split img { width:100%; border-radius:10px; border:1px solid var(--border); }
+    .split-body h4 { font-size:.95rem; font-weight:600; color:var(--white); margin-bottom:.6rem; }
+    .split-body p { font-size:.88rem; color:var(--grey); line-height:1.85; }
+    .split-body p strong { color:var(--white); font-weight:500; }
+
+    /* ── METRICS ROW (WACC boxes etc) ── */
+    .metrics { display:flex; flex-wrap:wrap; gap:.8rem; margin:1.8rem 0; }
+    .metric {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:10px; padding:1.1rem 1.4rem; flex:1; min-width:120px;
+      transition:border-color .25s;
+    }
+    .metric:hover { border-color:rgba(200,169,110,0.35); }
+    .metric.gold { background:rgba(200,169,110,0.12); border-color:rgba(200,169,110,0.35); }
+    .m-label { font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; color:var(--grey); margin-bottom:.35rem; }
+    .m-val { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; color:var(--white); line-height:1; }
+    .m-val.green { color:var(--green); }
+    .m-val.red   { color:var(--red); }
+    .m-val.gold  { color:var(--accent); }
+    .m-sub { font-size:.68rem; color:var(--grey); margin-top:.25rem; }
+
+    /* ── TABLE ── */
+    .tbl-wrap { overflow-x:auto; margin:1.8rem 0; }
+    table { width:100%; border-collapse:collapse; font-size:.85rem; }
+    thead tr { border-bottom:2px solid rgba(200,169,110,0.25); }
+    thead th { text-align:left; padding:.75rem 1rem; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:500; }
+    tbody tr { border-bottom:1px solid var(--border); transition:background .2s; }
+    tbody tr:hover { background:var(--bg2); }
+    tbody td { padding:.75rem 1rem; color:var(--grey); }
+    tbody td:first-child { color:var(--white); font-weight:400; }
+    .td-green { color:var(--green) !important; }
+    .td-red   { color:var(--red) !important; }
+    .td-gold  { color:var(--accent) !important; font-weight:500; }
+    tfoot tr { border-top:2px solid rgba(200,169,110,0.25); }
+    tfoot td { padding:.75rem 1rem; color:var(--white); font-weight:500; }
+    /* highlight row */
+    tr.highlight-row td { background:rgba(200,169,110,0.08); color:var(--accent); font-weight:600; }
+
+    /* ── NUMBERED LIST ── */
+    .numbered { list-style:none; margin:1.2rem 0; }
+    .numbered li { display:grid; grid-template-columns:44px 1fr; gap:.8rem; padding:1.1rem 0; border-bottom:1px solid var(--border); font-size:.88rem; color:var(--grey); line-height:1.75; }
+    .numbered li:last-child { border-bottom:none; }
+    .numbered li strong { color:var(--white); font-weight:500; display:block; margin-bottom:.15rem; }
+    .n-num { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--accent); padding-top:.1rem; }
+
+    /* ── BULLET LIST ── */
+    .bullets { list-style:none; margin:1rem 0; }
+    .bullets li { padding:.55rem 0; border-bottom:1px solid var(--border); font-size:.88rem; color:var(--grey); display:flex; gap:.8rem; line-height:1.7; }
+    .bullets li:last-child { border-bottom:none; }
+    .bullets li::before { content:'—'; color:var(--accent); flex-shrink:0; }
+    .bullets li strong { color:var(--white); font-weight:500; }
+
+    /* ── TOOL CHIPS ── */
+    .chips { display:flex; flex-wrap:wrap; gap:.5rem; margin:1rem 0; }
+    .chip { padding:.3rem .85rem; border-radius:50px; border:1px solid var(--border); font-size:.7rem; color:var(--grey); transition:border-color .25s,color .25s; }
+    .chip:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* DIVIDER */
+    .divider { width:100%; height:1px; background:var(--border); margin:3rem 0; }
+
+    /* CTA BOX */
+    .cta {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:14px; padding:3rem; text-align:center; margin-top:3rem;
+    }
+    .cta-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2rem,4vw,3.5rem); color:var(--white); margin-bottom:.8rem; }
+    .cta-text { font-size:.88rem; color:var(--grey); line-height:1.8; max-width:480px; margin:0 auto 1.8rem; }
+    .cta-btn { display:inline-block; padding:.8rem 2rem; border-radius:50px; background:var(--accent); color:#000; font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; font-weight:500; text-decoration:none; transition:all .3s; }
+    .cta-btn:hover { background:#d4b87a; transform:translateY(-2px); }
+
+    /* DISCLAIMER */
+    .disclaimer { font-size:.72rem; color:var(--grey); line-height:1.7; padding:1.5rem; background:var(--bg2); border:1px solid var(--border); border-radius:8px; margin-top:2rem; }
+
+    /* FOOTER */
+    footer { border-top:1px solid var(--border); padding:1.8rem 5%; display:flex; justify-content:space-between; align-items:center; background:var(--bg); }
+    footer span { font-size:.7rem; color:var(--grey); }
+    footer a { font-size:.7rem; color:var(--grey); text-decoration:none; transition:color .3s; }
+    footer a:hover { color:var(--accent); }
+
+    @media(max-width:768px){
+      .rating-box { grid-template-columns:1fr 1fr; }
+      .img-split { grid-template-columns:1fr; }
+      .img-split.flip { direction:ltr; }
+      .metrics { flex-direction:column; }
+      article { padding:4vh 4%; }
+    }
+    body { cursor: none; }
+#cur  { position:fixed; width:10px; height:10px; background:#C8A96E; border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .25s,height .25s; opacity:0; top:0; left:0; }
+#cring{ position:fixed; width:38px; height:38px; border:1px solid rgba(200,169,110,0.5); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .28s,height .28s; opacity:0; top:0; left:0; }
+@media(max-width:768px){ body{ cursor:auto; } #cur,#cring{ display:none; } }
+
+    /* === SCROLL PROGRESS BAR === */
+    #scroll-progress { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,#C8A96E,#E8C97A); width:0%; z-index:9999; box-shadow:0 0 8px rgba(200,169,110,.5); pointer-events:none; }
+
+    /* === CHEERS INTRO === */
+    #cheers-screen { position:fixed; inset:0; z-index:9000; background:#080A0F; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; transition:opacity .8s ease; }
+    #cheers-screen.hide { opacity:0; pointer-events:none; }
+    .cg { display:flex; align-items:flex-end; gap:4px; font-size:7rem; line-height:1; }
+    .gl { display:inline-block; animation:tL 1.2s ease forwards; }
+    .gr { display:inline-block; animation:tR 1.2s ease forwards; }
+    @keyframes tL { 0%{transform:rotate(38deg) translateX(-50px)} 80%{transform:rotate(16deg) translateX(-4px)} 100%{transform:rotate(18deg) translateX(-5px)} }
+    @keyframes tR { 0%{transform:rotate(-38deg) translateX(50px)} 80%{transform:rotate(-16deg) translateX(4px)} 100%{transform:rotate(-18deg) translateX(5px)} }
+    .cflash { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:10px; height:10px; border-radius:50%; background:rgba(200,169,110,0.8); animation:cfl .5s ease 1.15s forwards; }
+    @keyframes cfl { 0%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(25)} }
+    .ct { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,7vw,6rem); color:#C8A96E; letter-spacing:.2em; opacity:0; animation:fup .6s ease 1.3s forwards; }
+    .cs { font-size:.78rem; color:#8A8A96; letter-spacing:.12em; text-transform:uppercase; opacity:0; animation:fup .5s ease 1.7s forwards; }
+    .csk { position:absolute; bottom:2rem; right:2rem; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:#8A8A96; cursor:pointer; background:none; border:none; opacity:0; animation:fup .4s ease 2s forwards; transition:color .3s; font-family:inherit; }
+    .csk:hover { color:#C8A96E; }
+    @keyframes fup { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .drop { position:absolute; border-radius:50%; background:#C8A96E; opacity:0; animation:dr .7s ease forwards; }
+    @keyframes dr { 0%{opacity:.9;transform:translate(0,0) scale(1)} 100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.1)} }
+
+    /* === BOTTLE MASCOT === */
+    #mascot { position:fixed; right:2%; top:45%; z-index:300; pointer-events:none; display:flex; flex-direction:column; align-items:center; gap:.4rem; transition:top .2s ease-out; }
+    .m-emoji { font-size:2.6rem; animation:bob 2.5s ease-in-out infinite; display:block; }
+    @keyframes bob { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-10px) rotate(4deg)} }
+    .m-speech { background:#191C24; border:1px solid #C8A96E; border-radius:10px; padding:.55rem .85rem; font-size:.68rem; color:#F0EDE8; line-height:1.5; max-width:145px; text-align:center; position:relative; transition:opacity .35s,transform .35s; }
+    .m-speech::after { content:''; position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); border-left:7px solid transparent; border-right:7px solid transparent; border-top:7px solid #C8A96E; }
+
+    /* === BOTTOM TICKER === */
+    #bticker { position:fixed; bottom:0; left:0; right:0; z-index:400; background:rgba(17,19,24,.97); border-top:1px solid rgba(240,237,232,0.08); padding:.45rem 0; overflow:hidden; display:flex; backdrop-filter:blur(8px); }
+    .btrack { display:flex; flex-shrink:0; animation:bscroll 30s linear infinite; }
+    @keyframes bscroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .bi { display:flex; gap:.45rem; align-items:center; padding:0 1.5rem; border-right:1px solid rgba(240,237,232,0.07); white-space:nowrap; }
+    .bl { font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:#8A8A96; }
+    .bv { font-family:'Bebas Neue',sans-serif; font-size:.92rem; color:#F0EDE8; }
+    .bc { font-size:.63rem; font-weight:600; }
+    .tup{color:#22C55E} .tdn{color:#EF4444}
+
+    /* === SCROLL REVEAL === */
+    .rev { opacity:0; transform:translateY(26px); transition:opacity .7s ease,transform .7s ease; }
+    .rev.on { opacity:1; transform:translateY(0); }
+
+    /* === FLOATING PARTICLES === */
+    .fp { position:fixed; border-radius:50%; background:rgba(200,169,110,0.05); pointer-events:none; z-index:0; animation:fp linear infinite; }
+    @keyframes fp { 0%{transform:translateY(100vh) rotate(0);opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{transform:translateY(-100px) rotate(540deg);opacity:0} }
+
+    body { padding-bottom:40px; }
+    @media(max-width:768px){ #mascot{display:none} .cg{font-size:4.5rem} }
+
+  </style>
+</head>
+<body>
+
+<!-- NAV — EDIT: change portfolio8.html to your file -->
+
+<div id="scroll-progress"></div>
+
+<div id="cheers-screen">
+  <div class="cflash"></div>
+  <div class="cg"><span class="gl">🥃</span><span class="gr">🥃</span></div>
+  <div class="ct">Cheers!</div>
+  <div class="cs">Diageo plc &nbsp;·&nbsp; Equity Research &nbsp;·&nbsp; Madhav Arora</div>
+  <button class="csk" onclick="skipIntro()">Skip →</button>
+</div>
+
+<div id="mascot">
+  <div class="m-speech" id="mspeech">👋 Hi! I'm your Diageo guide. Scroll to explore!</div>
+  <span class="m-emoji" id="memoji">🍾</span>
+</div>
+
+<div id="bticker">
+  <div class="btrack">
+    <div class="bi"><span class="bl">DGE</span><span class="bv">1,394p</span><span class="bc tdn">▼ 1.8%</span></div>
+    <div class="bi"><span class="bl">Target</span><span class="bv" style="color:#C8A96E">1,900p</span><span class="bc tup">▲ 36.3%</span></div>
+    <div class="bi"><span class="bl">S&amp;P 500</span><span class="bv">5,218</span><span class="bc tup">▲ 0.82%</span></div>
+    <div class="bi"><span class="bl">FTSE 100</span><span class="bv">8,321</span><span class="bc tup">▲ 0.47%</span></div>
+    <div class="bi"><span class="bl">Pernod Ricard</span><span class="bv">€82.4</span><span class="bc tdn">▼ 0.3%</span></div>
+    <div class="bi"><span class="bl">Campari</span><span class="bv">€6.12</span><span class="bc tup">▲ 0.5%</span></div>
+    <div class="bi"><span class="bl">GBP/USD</span><span class="bv">1.2734</span><span class="bc tdn">▼ 0.21%</span></div>
+    <div class="bi"><span class="bl">Rating</span><span class="bv" style="color:#C8A96E">ACCUMULATE</span></div>
+    <div class="bi"><span class="bl">DGE</span><span class="bv">1,394p</span><span class="bc tdn">▼ 1.8%</span></div>
+    <div class="bi"><span class="bl">Target</span><span class="bv" style="color:#C8A96E">1,900p</span><span class="bc tup">▲ 36.3%</span></div>
+    <div class="bi"><span class="bl">S&amp;P 500</span><span class="bv">5,218</span><span class="bc tup">▲ 0.82%</span></div>
+    <div class="bi"><span class="bl">FTSE 100</span><span class="bv">8,321</span><span class="bc tup">▲ 0.47%</span></div>
+    <div class="bi"><span class="bl">Pernod Ricard</span><span class="bv">€82.4</span><span class="bc tdn">▼ 0.3%</span></div>
+    <div class="bi"><span class="bl">Campari</span><span class="bv">€6.12</span><span class="bc tup">▲ 0.5%</span></div>
+    <div class="bi"><span class="bl">GBP/USD</span><span class="bv">1.2734</span><span class="bc tdn">▼ 0.21%</span></div>
+    <div class="bi"><span class="bl">Rating</span><span class="bv" style="color:#C8A96E">ACCUMULATE</span></div>
+  </div>
+</div>
+
+<nav>
+  <a href="portfolio8.html" class="nav-logo">Madhav Arora</a>
+  <a href="portfolio8.html#p-work" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     HERO
+     EDIT BACKGROUND IMAGE:
+     In the CSS above find "#hero {" and uncomment:
+     background-image: url('your-image.jpg');
+     Upload your image to GitHub with that filename
+══════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-inner">
+
+    <!-- EDIT: Sector / category -->
+    <div class="sector-tag">Equity Research · Consumer Staples · Beverages</div>
+
+    <!-- EDIT: Company name -->
+    <h1 class="company-name">Diageo plc</h1>
+
+    <!-- EDIT: Ticker and exchange -->
+    <p class="company-ticker">LSE: DGE &nbsp;·&nbsp; The Plain-English Story — What's Happening &amp; What To Do</p>
+
+    <!-- ══════════════════════════════
+         RATING BOX — like your PDF
+         EDIT: Change all 4 values
+    ══════════════════════════════ -->
+    <div class="rating-box">
+      <div class="rating-cell highlight">
+        <div class="r-label">Rating</div>
+        <div class="r-value gold">ACCUMULATE</div>
+      </div>
+      <div class="rating-cell">
+        <div class="r-label">Current Price</div>
+        <div class="r-value">1,394p</div>
+      </div>
+      <div class="rating-cell">
+        <div class="r-label">12M Target</div>
+        <div class="r-value">1,900p</div>
+      </div>
+      <div class="rating-cell">
+        <div class="r-label">Upside</div>
+        <div class="r-value green">+36.3%</div>
+      </div>
+    </div>
+
+    <!-- EDIT: Small stats row -->
+    <div class="stats-row">
+      <span class="stat-item">Mkt Cap: <strong>£31.2bn</strong></span>
+      <span class="stat-item">P/E: <strong>11.4x</strong></span>
+      <span class="stat-item">52W High: <strong>2,122p</strong></span>
+      <span class="stat-item">52W Low: <strong>1,330p</strong></span>
+      <span class="stat-item">Net Debt/EBITDA: <strong>3.4x</strong></span>
+      <span class="stat-item">Div Yield: <strong>3.6%</strong></span>
+    </div>
+
+    <!-- AUTHOR ROW -->
+    <div class="author-row">
+      <div class="author-avatar">
+             <img src="diageo/photo.png" alt="Madhav Arora"/>
+      </div>
+      <div>
+        <div class="author-name">Madhav Arora</div>
+        <!-- EDIT: Date and read time -->
+        <div class="author-date">April 4, 2026 &nbsp;·&nbsp; 10 min read</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ARTICLE BODY
+     HOW TO USE:
+     · Copy any block below and paste it where needed
+     · Each block is clearly labelled
+     · Just change the text between the tags
+══════════════════════════════════════════════ -->
+<article>
+
+  <!-- ════════════════════════════════
+       SECTION HEADING
+       Use this to start every new section
+  ════════════════════════════════ -->
+  <h2 class="h2">The Story in Plain English — Think of It Like This</h2>
+
+  <!-- PARAGRAPH — just type your text here -->
+  <p class="p">
+    Imagine you own a very famous, very old pub chain. Your pubs serve the best whisky, the best gin, the best beer in the world. For 20 years, business was booming — people paid more and more for premium drinks, profits grew, and the share price kept rising.
+  </p>
+  <p class="p">
+    Then three things happened at once: your biggest customers (Americans) started watching their wallets, your second biggest market (China) stopped bouncing back from COVID, and you had borrowed a lot of money during the good times to expand. Now the interest bills are piling up while sales are shrinking.
+  </p>
+
+  <!-- CALLOUT BOX — for key insight or quote -->
+  <div class="callout">
+    Diageo is a Ferrari stuck in traffic. The car is still a Ferrari — world-class brands, 180 countries, 200 years of heritage. But right now it is not moving fast, debt is high, and the driver just changed. Our job: buy it cheap before the traffic clears.
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════
+       FULL WIDTH SCREENSHOT
+       Upload your chart image to GitHub
+       Replace "chart1.png" with filename
+  ════════════════════════════════ -->
+  <h2 class="h2">The Numbers: Revenue &amp; EBITDA Trend</h2>
+  <p class="p">Revenue peaked at $20.6bn in FY2023 and has been sliding since. EBITDA dropped from $6.5bn to an estimated $5.5bn — that's nearly $1bn of profit wiped out in two years.</p>
+
+  <div class="img-full">
+    <!-- EDIT: Replace "chart1.png" with your screenshot filename -->
+    <img src="diageo/diageo.chart.png" alt="Revenue and EBITDA Trend Chart"/>
+    <p class="img-caption"></p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════
+       SCREENSHOT LEFT + TEXT RIGHT
+       Great for charts with explanation
+  ════════════════════════════════ -->
+  <h2 class="h2">Why Is Diageo Struggling? — The 6 Reasons</h2>
+
+  <div class="img-split">
+    <!-- EDIT: Replace with your screenshot -->
+    <img src="diageo/diageo.chart.png2.png" alt="Key Headwinds Chart"/>
+    <div class="split-body">
+      <h4>Key Headwinds Ranked</h4>
+      <p>Six major forces are dragging on Diageo's performance simultaneously — from the tapped-out American consumer to a ballooning debt pile that is now <strong>$21.9bn</strong>. Each is rated by severity below.</p>
+    </div>
+  </div>
+
+  <!-- NUMBERED LIST — for your 6 reasons -->
+  <ol class="numbered">
+    <li>
+      <span class="n-num">01</span>
+      <div><strong>The American Consumer is Tapped Out (9/10)</strong> The US is 38% of all revenue. Americans are cutting back on expensive spirits. Tequila crashed 23% in H1 FY2026. People are trading down from a $60 Don Julio to cheaper options.</div>
+    </li>
+    <li>
+      <span class="n-num">02</span>
+      <div><strong>China is Not Recovering (7/10)</strong> Asia Pacific fell 12.8% organically. China's post-COVID bounce never fully arrived — high youth unemployment, collapsed property wealth, and consumers simply not splurging on premium alcohol.</div>
+    </li>
+    <li>
+      <span class="n-num">03</span>
+      <div><strong>Massive Debt Burden (8/10)</strong> Net debt has ballooned from $11bn in FY2021 to $21.9bn today. As global interest rates rose sharply from 2022-2024, the cost of servicing that debt became far more expensive.</div>
+    </li>
+    <li>
+      <span class="n-num">04</span>
+      <div><strong>FX / Currency Headwinds (5/10)</strong> Diageo reports in USD but earns in dozens of currencies. The FX effect knocked hundreds of millions off reported revenues every year — entirely outside management's control.</div>
+    </li>
+    <li>
+      <span class="n-num">05</span>
+      <div><strong>US Distribution Destocking (6/10)</strong> American distributors over-ordered during COVID and have spent two years selling existing stock rather than ordering fresh product from Diageo.</div>
+    </li>
+    <li>
+      <span class="n-num">06</span>
+      <div><strong>Premiumisation Strategy Hit a Wall (7/10)</strong> For a decade, Diageo's strategy was convincing people to trade UP to premium drinks. With global inflation running hot 2022-2025, people stopped trading up.</div>
+    </li>
+  </ol>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════
+       TEXT RIGHT + SCREENSHOT LEFT (flipped)
+       Add class="flip" to reverse layout
+  ════════════════════════════════ -->
+  <h2 class="h2">The Share Price: From Boom to Crash</h2>
+
+  <div class="img-split flip">
+    <!-- EDIT: Replace with your screenshot -->
+    <img src="diageo/diageo.chart.png3.png" alt="DGE Share Price Journey"/>
+    <div class="split-body">
+      <h4>A 66% Peak-to-Trough Decline</h4>
+      <p>DGE has fallen from <strong>4,100p</strong> (all-time high, Jan 2022) to <strong>1,394p</strong> today. Our 12-month target of 1,900p represents 36% upside from here.</p>
+    </div>
+  </div>
+
+  <!-- TABLE — key milestones -->
+  <h3 class="h3">Key Milestones That Moved the Price</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>When</th>
+          <th>Price</th>
+          <th>What Happened</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Jan 2022</td>
+          <td>~4,100p</td>
+          <td>All-time high — premium spirits boom post-COVID</td>
+        </tr>
+        <tr>
+          <td>Jul 2024</td>
+          <td>~2,200p</td>
+          <td>CEO Debra Crew suddenly exits after just 2 years</td>
+        </tr>
+        <tr>
+          <td>Jan 2026</td>
+          <td>~1,850p</td>
+          <td>New CEO Sir Dave Lewis takes over</td>
+        </tr>
+        <tr class="highlight-row">
+          <td>25 Feb 2026</td>
+          <td>~1,420p</td>
+          <td>WORST EVER day — dividend halved, guidance cut</td>
+        </tr>
+        <tr>
+          <td>2 Apr 2026</td>
+          <td>1,394p</td>
+          <td>Stabilising — analysts say valuation floor reached</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════
+       METRICS ROW — WACC boxes etc
+  ════════════════════════════════ -->
+  <h2 class="h2">Valuation: Diageo is the Cheapest It Has Ever Been</h2>
+  <p class="p">Diageo trades at 11.4x P/E and 9.0x EV/EBITDA — a 31% discount to the sector median. You are buying a world-class business at a discount-store price.</p>
+
+  <!-- EDIT: Change labels and values -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="m-label">P/E Ratio</div>
+      <div class="m-val">11.4x</div>
+      <div class="m-sub">Sector avg: 16.5x</div>
+    </div>
+    <div class="metric">
+      <div class="m-label">EV/EBITDA</div>
+      <div class="m-val">9.0x</div>
+      <div class="m-sub">Sector avg: 13x</div>
+    </div>
+    <div class="metric gold">
+      <div class="m-label">12M Target</div>
+      <div class="m-val gold">1,900p</div>
+      <div class="m-sub">Blended method</div>
+    </div>
+    <div class="metric">
+      <div class="m-label">Upside</div>
+      <div class="m-val green">+36.3%</div>
+      <div class="m-sub">From 1,394p</div>
+    </div>
+    <div class="metric">
+      <div class="m-label">Div Yield</div>
+      <div class="m-val">3.6%</div>
+      <div class="m-sub">Post-cut</div>
+    </div>
+  </div>
+
+  <!-- Full width chart -->
+  <div class="img-full">
+    <!-- EDIT: Replace with your valuation chart screenshot -->
+    <img src="diageo/diageo.chart.png4.png" alt="Valuation vs Peers Chart"/>
+    <p class="img-caption"></p>
+  </div>
+
+  <!-- Target price table -->
+  <h3 class="h3">Where Could the Price Go?</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Implied Price</th><th>Source</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Morningstar Fair Value</td><td>2,140p</td><td>Wide Moat — 4-Star Rating</td></tr>
+        <tr><td>Analyst Consensus Target</td><td>2,028p</td><td>Stockopedia Consensus (April 2026)</td></tr>
+        <tr><td>Our EV/EBITDA Target</td><td>1,850p</td><td>11.5x FY27E EBITDA</td></tr>
+        <tr><td>Our P/E Target</td><td>1,950p</td><td>15x FY27E EPS Recovery</td></tr>
+        <tr class="highlight-row"><td>OUR BLENDED TARGET</td><td>1,900p</td><td>Conservative — 12-Month View</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ════════════════════════════════
+       BULLET LIST — for recommendations
+  ════════════════════════════════ -->
+  <h2 class="h2">My Recommendation — The Analyst's Call</h2>
+
+  <ul class="bullets">
+    <li><strong>Buy the Cheapest Guy in the Room:</strong> At 11.4x earnings, DGE hasn't been this cheap since 2010. You are buying Johnnie Walker, Guinness and Don Julio at a discount-store price.</li>
+    <li><strong>The New Boss Knows How to Fix Things:</strong> Sir Dave Lewis fixed Tesco when it was nearly bankrupt — he cut costs, repaired the balance sheet and rebuilt confidence.</li>
+    <li><strong>The Dividend Cut is Actually Good News:</strong> By halving the dividend, the company can now use that cash to pay down its $21.9bn debt pile faster.</li>
+    <li><strong>Guinness is a Star:</strong> Eight consecutive halves of double-digit growth. Beer is keeping the lights on while whisky and tequila recover.</li>
+    <li><strong>36% Upside is Hard to Ignore:</strong> Current price 1,394p. Our target 1,900p. Morningstar says 2,140p. Even if they are half right, that is still a strong return.</li>
+  </ul>
+
+  <!-- CHIPS — tools used -->
+  <div class="divider"></div>
+  <h2 class="h2">Tools &amp; Methods</h2>
+  <div class="chips">
+    <span class="chip">DCF Analysis</span>
+    <span class="chip">EV/EBITDA Valuation</span>
+    <span class="chip">P/E Multiples</span>
+    <span class="chip">Bloomberg</span>
+    <span class="chip">Hargreaves Lansdown</span>
+    <span class="chip">Stockopedia</span>
+    <span class="chip">Morningstar</span>
+    <span class="chip">Microsoft Excel</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <div class="cta-title">Want to Discuss<br>This Analysis?</div>
+    <p class="cta-text">Open to discussing this research in more detail. Book a call or send me an email.</p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+  <a href="https://calendly.com/madhav00027/30min" target="_blank" class="cta-btn">📅 Book a Call</a>
+  <a href="mailto:madhavarora1213@gmail.com" class="cta-btn">✉️ Email Me</a>
+  </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <strong style="color:var(--light)">Disclaimer:</strong> This document is prepared for informational and educational purposes only and does not constitute investment advice or a recommendation to buy or sell any security. All data sourced from Diageo plc public filings, Hargreaves Lansdown, Stockopedia, Morningstar, and other public sources as at 2-4 April 2026. Past performance is not indicative of future results.
+  </div>
+
+</article>
+
+<footer>
+  <span>© 2026 Madhav Arora — Financial Analyst</span>
+  <a href="portfolio8.html">← Back to Portfolio</a>
+</footer>
+
+<div id="cur"></div>
+<div id="cring"></div>
+<script>
+const cur=document.getElementById('cur');
+const cr=document.getElementById('cring');
+let mx=0,my=0,rx=0,ry=0,on=false;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+  if(!on){ cur.style.opacity='1'; cr.style.opacity='1'; on=true; }
+});
+(function loop(){ rx+=(mx-rx)*.11; ry+=(my-ry)*.11; cr.style.left=rx+'px'; cr.style.top=ry+'px'; requestAnimationFrame(loop); })();
+document.addEventListener('mouseleave',()=>{ cur.style.opacity='0'; cr.style.opacity='0'; on=false; });
+document.addEventListener('mouseenter',()=>{ if(on){ cur.style.opacity='1'; cr.style.opacity='1'; } });
+document.querySelectorAll('a').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ cur.style.width='0'; cr.style.width='54px'; cr.style.height='54px'; cr.style.borderColor='rgba(200,169,110,1)'; });
+  el.addEventListener('mouseleave',()=>{ cur.style.width='10px'; cur.style.height='10px'; cr.style.width='38px'; cr.style.height='38px'; cr.style.borderColor='rgba(200,169,110,0.5)'; });
+});
+</script>
+
+<script>
+/* === CHEERS INTRO === */
+document.body.style.overflow = 'hidden';
+var cs = document.getElementById('cheers-screen');
+
+// create splash drops
+for(var i=0;i<16;i++){
+  var d=document.createElement('div');
+  d.className='drop';
+  var s=Math.random()*9+5;
+  d.style.cssText='width:'+s+'px;height:'+s+'px;left:calc(50% + '+(Math.random()-.5)*55+'px);top:calc(50% - 5px);--dx:'+(Math.random()-.5)*170+'px;--dy:'+(-(Math.random()*90+25))+'px;animation-delay:'+(Math.random()*.2+1.1)+'s;';
+  cs.appendChild(d);
+}
+
+function skipIntro(){
+  cs.classList.add('hide');
+  setTimeout(function(){ document.body.style.overflow=''; cs.style.display='none'; },850);
+}
+setTimeout(skipIntro, 3500);
+
+/* === SCROLL PROGRESS === */
+window.addEventListener('scroll', function(){
+  var pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('scroll-progress').style.width = pct + '%';
+  updateMascot(pct);
+}, {passive:true});
+
+/* === BOTTLE MASCOT === */
+var mascotEl = document.getElementById('mascot');
+var speechEl = document.getElementById('mspeech');
+var emojiEl  = document.getElementById('memoji');
+var msgs = [
+  {p:0,  e:'🍾', t:"👋 Hi! I'm your Diageo guide. Scroll to explore!"},
+  {p:8,  e:'📖', t:"The story of how a giant stumbled..."},
+  {p:20, e:'😰', t:"Revenue down $1bn in 2 years. Tough times."},
+  {p:33, e:'🇺🇸', t:"Americans cut Don Julio spending by 23%!"},
+  {p:46, e:'📉', t:"From 4,100p to 1,394p — a 66% crash!"},
+  {p:58, e:'🤔', t:"But wait... is this a buying opportunity?"},
+  {p:70, e:'💰', t:"11.4x P/E! Cheapest since 2010!"},
+  {p:82, e:'✅', t:"Target: 1,900p = +36% upside. Accumulate!"},
+  {p:94, e:'🥃', t:"Cheers to smart investing! Book a call!"},
+];
+var lastIdx = -1;
+
+function updateMascot(pct){
+  mascotEl.style.top = Math.max(12,Math.min(80,15+pct*.65))+'%';
+  var idx=0;
+  for(var i=0;i<msgs.length;i++){ if(pct>=msgs[i].p) idx=i; }
+  if(idx===lastIdx) return;
+  lastIdx=idx;
+  speechEl.style.opacity='0';
+  speechEl.style.transform='translateY(6px)';
+  (function(m){ setTimeout(function(){
+    speechEl.textContent=m.t;
+    emojiEl.textContent=m.e;
+    speechEl.style.opacity='1';
+    speechEl.style.transform='translateY(0)';
+  },300); })(msgs[idx]);
+}
+
+/* === FLOATING PARTICLES === */
+for(var j=0;j<10;j++){
+  var p=document.createElement('div');
+  p.className='fp';
+  var ps=Math.random()*50+15;
+  p.style.cssText='width:'+ps+'px;height:'+ps+'px;left:'+Math.random()*100+'%;animation-duration:'+(Math.random()*18+14)+'s;animation-delay:'+(Math.random()*10)+'s;';
+  document.body.appendChild(p);
+}
+
+/* === SCROLL REVEAL === */
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target);} });
+},{threshold:0.08});
+document.querySelectorAll('.h2,.p,.callout,.img-full,.img-split,.metrics,.tbl-wrap,.bullets,.chips,.cta,.numbered,.divider').forEach(function(el){
+  el.classList.add('rev'); obs.observe(el);
+});
+</script>
+
+</body>
+</html>
