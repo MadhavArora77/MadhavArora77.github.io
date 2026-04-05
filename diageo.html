@@ -278,11 +278,33 @@
 #cur  { position:fixed; width:10px; height:10px; background:#C8A96E; border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .25s,height .25s; opacity:0; top:0; left:0; }
 #cring{ position:fixed; width:38px; height:38px; border:1px solid rgba(200,169,110,0.5); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .28s,height .28s; opacity:0; top:0; left:0; }
 @media(max-width:768px){ body{ cursor:auto; } #cur,#cring{ display:none; } }
+    #cheers-screen { position:fixed; inset:0; z-index:9000; background:#080A0F; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; transition:opacity .8s ease; }
+#cheers-screen.hide { opacity:0; pointer-events:none; }
+.cg { display:flex; align-items:flex-end; gap:4px; font-size:7rem; line-height:1; }
+.gl { display:inline-block; animation:tL 1.2s ease forwards; }
+.gr { display:inline-block; animation:tR 1.2s ease forwards; }
+@keyframes tL { 0%{transform:rotate(38deg) translateX(-50px)} 100%{transform:rotate(18deg) translateX(-5px)} }
+@keyframes tR { 0%{transform:rotate(-38deg) translateX(50px)} 100%{transform:rotate(-18deg) translateX(5px)} }
+.cflash { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:10px; height:10px; border-radius:50%; background:rgba(200,169,110,0.8); animation:cfl .5s ease 1.15s forwards; }
+@keyframes cfl { 0%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(25)} }
+.ct { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,7vw,6rem); color:#C8A96E; letter-spacing:.2em; opacity:0; animation:fup .6s ease 1.3s forwards; }
+.cs { font-size:.78rem; color:#8A8A96; letter-spacing:.12em; text-transform:uppercase; opacity:0; animation:fup .5s ease 1.7s forwards; }
+.csk { position:absolute; bottom:2rem; right:2rem; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:#8A8A96; cursor:pointer; background:none; border:none; opacity:0; animation:fup .4s ease 2s forwards; transition:color .3s; font-family:inherit; }
+.csk:hover { color:#C8A96E; }
+@keyframes fup { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
   </style>
 </head>
 <body>
 
 <!-- NAV EDIT: change portfolio8.html to your file -->
+  <script>
+document.body.style.overflow = 'hidden';
+function skipIntro(){
+  document.getElementById('cheers-screen').classList.add('hide');
+  setTimeout(function(){ document.body.style.overflow=''; }, 850);
+}
+setTimeout(skipIntro, 3500);
+</script>
 <nav>
   <a href="portfolio8.html" class="nav-logo">Madhav Arora</a>
   <a href="portfolio8.html#p-work" class="nav-back">← Back to Portfolio</a>
