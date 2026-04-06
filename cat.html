@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Caterpillar Inc. (NYSE: CAT) — The Machine That Builds The World | Madhav Arora</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --yellow:  #FFCD11;
+  --yellow2: #E6B800;
+  --dark:    #1A1A1A;
+  --charcoal:#2D2D2D;
+  --steel:   #4A4A4A;
+  --paper:   #F8F6F0;
+  --cream:   #F0EDE4;
+  --muted:   #888880;
+  --border:  rgba(26,26,26,0.1);
+  --green:   #2D7A3A;
+  --red:     #C0392B;
+  --white:   #FFFFFF;
+}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--dark);font-family:'Barlow',sans-serif;font-weight:400;overflow-x:hidden;cursor:none}
+
+/* ═══ CUSTOM CURSOR ═══ */
+#cur{position:fixed;width:12px;height:12px;background:var(--dark);border-radius:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%) rotate(45deg);transition:width .2s,height .2s,background .2s;opacity:0;top:0;left:0}
+#cring{position:fixed;width:38px;height:38px;border:2px solid rgba(26,26,26,0.5);border-radius:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%) rotate(45deg);transition:width .28s,height .28s,border-color .28s;opacity:0;top:0;left:0}
+@media(max-width:768px){body{cursor:auto}#cur,#cring{display:none}}
+
+/* ═══ PROGRESS ═══ */
+#spbar{position:fixed;top:0;left:0;height:4px;background:var(--yellow);width:0%;z-index:9999;pointer-events:none}
+
+/* ═══ INTRO / CONSTRUCTION ANIMATION ═══ */
+#intro{
+  position:fixed;inset:0;z-index:9000;
+  background:var(--dark);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;
+  transition:opacity .9s ease;
+}
+#intro.hide{opacity:0;pointer-events:none}
+.intro-hat{font-size:6rem;animation:hatDrop 0.8s cubic-bezier(.36,.07,.19,.97) forwards;transform:translateY(-120px);opacity:0}
+@keyframes hatDrop{0%{transform:translateY(-120px);opacity:0}70%{transform:translateY(15px);opacity:1}85%{transform:translateY(-8px)}100%{transform:translateY(0);opacity:1}}
+.intro-sparks{position:absolute;width:100%;height:100%;pointer-events:none;overflow:hidden}
+.spark{position:absolute;width:4px;height:4px;background:var(--yellow);border-radius:50%;animation:sparkFly 0.8s ease-out forwards;opacity:0}
+@keyframes sparkFly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0)}}
+.intro-cat{font-family:'Black Han Sans',sans-serif;font-size:clamp(4rem,15vw,12rem);color:var(--yellow);letter-spacing:-.02em;line-height:1;opacity:0;animation:buildIn 0.6s ease 1s forwards}
+@keyframes buildIn{from{opacity:0;transform:scaleX(0.3);filter:blur(8px)}to{opacity:1;transform:scaleX(1);filter:blur(0)}}
+.intro-sub{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.4);opacity:0;animation:fadeUp .5s ease 1.5s forwards}
+.intro-bar{width:200px;height:3px;background:rgba(255,255,255,.1);border-radius:0;overflow:hidden;margin-top:.5rem;opacity:0;animation:fadeUp .4s ease 1.7s forwards}
+.intro-bar-fill{height:100%;background:var(--yellow);width:0%;animation:loadBar 1s ease 1.8s forwards}
+@keyframes loadBar{to{width:100%}}
+.intro-skip{position:absolute;bottom:2rem;right:2rem;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);cursor:pointer;background:none;border:none;font-family:'Barlow',sans-serif;opacity:0;animation:fadeUp .4s ease 2s forwards;transition:color .3s}
+.intro-skip:hover{color:var(--yellow)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ NAV ═══ */
+nav{
+  position:fixed;top:4px;width:100%;z-index:600;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:.9rem 4%;
+  background:rgba(248,246,240,0.97);
+  border-bottom:3px solid var(--yellow);
+  backdrop-filter:blur(12px);
+}
+.nav-left{display:flex;align-items:center;gap:1rem}
+.nav-cat-badge{background:var(--yellow);padding:.35rem .7rem;font-family:'Black Han Sans',sans-serif;font-size:.9rem;letter-spacing:.05em;color:var(--dark)}
+.nav-logo{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--dark);text-decoration:none}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color .2s;font-weight:500}
+.nav-links a:hover{color:var(--dark)}
+.nav-cta{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;background:var(--dark);color:var(--yellow);padding:.55rem 1.3rem;font-weight:700;text-decoration:none;font-family:'Barlow Condensed',sans-serif;transition:background .2s}
+.nav-cta:hover{background:var(--charcoal)}
+
+/* ═══ HERO — YELLOW FULL BLEED ═══ */
+#hero{
+  background:var(--yellow);
+  min-height:100vh;
+  display:grid;
+  grid-template-rows:1fr auto;
+  padding:120px 4% 0;
+  position:relative;overflow:hidden;
+}
+/* blueprint grid overlay */
+#hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(26,26,26,0.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(26,26,26,0.06) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+/* diagonal stripe accent */
+#hero::after{
+  content:'';position:absolute;right:-80px;top:-80px;
+  width:350px;height:350px;
+  background:rgba(26,26,26,0.06);
+  transform:rotate(45deg);
+}
+.hero-eyebrow{
+  font-family:'Barlow Condensed',sans-serif;font-size:.75rem;
+  font-weight:700;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(26,26,26,0.5);margin-bottom:1rem;
+  display:flex;align-items:center;gap:.8rem;position:relative;z-index:1;
+}
+.hero-eyebrow::before{content:'▶';font-size:.5rem;color:var(--dark)}
+.hero-headline{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:clamp(4rem,13vw,16rem);
+  line-height:.85;color:var(--dark);
+  position:relative;z-index:1;
+  margin-bottom:.5rem;
+}
+.hero-headline span{
+  display:block;color:var(--dark);
+  -webkit-text-stroke:2px var(--dark);
+}
+.hero-headline span.outline{
+  color:transparent;
+  -webkit-text-stroke:2px var(--dark);
+}
+.hero-sub{
+  font-family:'Barlow Condensed',sans-serif;font-size:clamp(1rem,2vw,1.6rem);
+  font-weight:400;color:rgba(26,26,26,0.6);
+  margin-bottom:2.5rem;position:relative;z-index:1;
+  max-width:600px;line-height:1.4;
+}
+
+/* rating strip — dark bar */
+.hero-rating-strip{
+  background:var(--dark);
+  display:flex;align-items:stretch;
+  position:relative;z-index:1;
+  margin:0 -4%;
+}
+.hrs-cell{
+  padding:1.2rem 2rem;flex:1;
+  border-right:1px solid rgba(255,255,255,.08);
+  text-align:center;
+}
+.hrs-cell:last-child{border-right:none}
+.hrs-cell.accent{background:rgba(255,205,17,0.15)}
+.hrs-lbl{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.4rem;font-family:'Barlow Condensed',sans-serif}
+.hrs-val{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.2rem,2.5vw,2rem);font-weight:900;color:#fff;letter-spacing:.02em}
+.hrs-val.yellow{color:var(--yellow)}
+.hrs-val.green{color:#4ade80}
+.hrs-val.red{color:#f87171}
+
+/* author bar */
+.hero-author-bar{
+  background:rgba(26,26,26,0.08);
+  display:flex;align-items:center;gap:1rem;
+  padding:1rem 0;margin:0 -4%;padding-left:4%;
+  border-top:1px solid rgba(26,26,26,0.12);
+  position:relative;z-index:1;
+}
+.auth-av{width:36px;height:36px;border-radius:0;border:2px solid var(--dark);overflow:hidden;background:var(--dark);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.auth-av img{width:100%;height:100%;object-fit:cover}
+.auth-av .ini{font-size:.8rem;font-weight:700;color:var(--yellow);font-family:'Barlow Condensed',sans-serif}
+.auth-name{font-size:.82rem;font-weight:600;color:var(--dark);font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em}
+.auth-date{font-size:.7rem;color:rgba(26,26,26,0.5)}
+
+/* ═══ 3-COLUMN BODY ═══ */
+#body-wrap{
+  display:grid;
+  grid-template-columns:280px 1fr 260px;
+  gap:0;
+  min-height:100vh;
+}
+
+/* LEFT SIDEBAR */
+#left-sidebar{
+  padding:4vh 1.5rem;
+  background:var(--dark);
+  position:sticky;top:64px;height:calc(100vh - 64px);
+  overflow-y:auto;display:flex;flex-direction:column;gap:1.2rem;
+}
+#left-sidebar::-webkit-scrollbar{width:3px}
+#left-sidebar::-webkit-scrollbar-thumb{background:rgba(255,205,17,0.3);border-radius:0}
+.ls-section{border:1px solid rgba(255,255,255,.08);padding:1.1rem}
+.ls-title{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--yellow);margin-bottom:.9rem;font-weight:700}
+.ls-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.78rem}
+.ls-row:last-child{border-bottom:none}
+.ls-row .lk{color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif;letter-spacing:.03em}
+.ls-row .lv{font-weight:600;color:#fff;font-family:'Barlow Condensed',sans-serif}
+.ls-row .lv.yellow{color:var(--yellow)}
+.ls-row .lv.green{color:#4ade80}
+.ls-row .lv.red{color:#f87171}
+
+/* cat stats with yellow number */
+.big-stat{text-align:center;padding:1rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.big-stat:last-child{border-bottom:none}
+.big-stat .bn{font-family:'Black Han Sans',sans-serif;font-size:2.2rem;color:var(--yellow);line-height:1}
+.big-stat .bl{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:.2rem}
+
+/* MAIN COLUMN */
+#main-col{padding:5vh 3%;border-left:1px solid var(--border);border-right:1px solid var(--border);background:var(--paper)}
+
+/* RIGHT SIDEBAR */
+#right-sidebar{
+  padding:4vh 1.5rem;
+  background:var(--cream);
+  position:sticky;top:64px;height:calc(100vh - 64px);
+  overflow-y:auto;display:flex;flex-direction:column;gap:1.2rem;
+  border-left:3px solid var(--yellow);
+}
+#right-sidebar::-webkit-scrollbar{width:3px}
+.rs-section{background:var(--white);border:1px solid var(--border);padding:1.1rem}
+.rs-title{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--steel);margin-bottom:.9rem;font-weight:700}
+
+/* risk bars */
+.risk-item{margin-bottom:.8rem}
+.risk-label-row{display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.3rem;font-family:'Barlow Condensed',sans-serif}
+.risk-track{height:6px;background:#e5e5e5;overflow:hidden}
+.risk-fill{height:100%;transition:width 1.2s ease}
+
+/* ═══ ARTICLE ELEMENTS ═══ */
+.section-marker{
+  display:flex;align-items:center;gap:.8rem;
+  margin-bottom:.8rem;
+}
+.sm-num{
+  font-family:'Black Han Sans',sans-serif;font-size:3rem;
+  color:var(--yellow);line-height:1;opacity:.25;
+}
+.sm-tag{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+.h2{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(1.6rem,3vw,2.4rem);
+  font-weight:900;color:var(--dark);
+  margin:4rem 0 1rem;padding-top:4rem;
+  border-top:3px solid var(--yellow);
+  line-height:1.1;letter-spacing:.01em;
+  text-transform:uppercase;
+}
+.h2:first-child{border-top:none;padding-top:0;margin-top:0}
+.h3{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);margin:1.5rem 0 .5rem;padding-left:.8rem;border-left:3px solid var(--yellow)}
+.p{font-size:.93rem;line-height:1.9;color:var(--steel);margin-bottom:.9rem;font-weight:400}
+.p strong{color:var(--dark);font-weight:600}
+.p em{font-style:italic;color:var(--charcoal)}
+
+/* callout — blueprint style */
+.callout{
+  background:var(--dark);
+  padding:1.4rem 1.8rem;margin:2rem 0;
+  position:relative;
+  font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;
+  color:#fff;line-height:1.6;font-weight:600;letter-spacing:.01em;
+}
+.callout::before{
+  content:'//';position:absolute;top:1.2rem;left:-1rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;
+  color:var(--yellow);font-weight:900;
+}
+.callout em{color:var(--yellow);font-style:normal}
+
+/* yellow highlight box */
+.highlight{
+  background:var(--yellow);padding:1.2rem 1.6rem;
+  margin:1.5rem 0;border-left:4px solid var(--dark);
+  font-family:'Barlow Condensed',sans-serif;font-size:1rem;
+  color:var(--dark);font-weight:600;line-height:1.6;
+}
+
+/* image blocks */
+.img-full{margin:2rem 0}
+.img-full img{width:100%;border:2px solid var(--border);display:block}
+.img-caption{font-size:.72rem;color:var(--muted);margin-top:.5rem;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em}
+
+.img-split{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;margin:2rem 0}
+.img-split.flip{direction:rtl}
+.img-split.flip>*{direction:ltr}
+.img-split img{width:100%;border:2px solid var(--border)}
+.split-body h4{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--dark);margin-bottom:.6rem}
+.split-body p{font-size:.87rem;color:var(--steel);line-height:1.8}
+
+/* 3 col metrics */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin:1.8rem 0;border:1px solid var(--border)}
+.metric{background:var(--white);padding:1.2rem;text-align:center;transition:background .2s}
+.metric:hover{background:var(--yellow)}
+.metric:hover .m-val{color:var(--dark)}
+.metric:hover .m-lbl{color:rgba(26,26,26,.6)}
+.metric.featured{background:var(--dark)}
+.metric.featured .m-val{color:var(--yellow)}
+.metric.featured .m-lbl{color:rgba(255,255,255,.4)}
+.metric.featured:hover{background:var(--charcoal)}
+.m-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;font-weight:700}
+.m-val{font-family:'Black Han Sans',sans-serif;font-size:1.8rem;color:var(--dark);line-height:1}
+.m-val.green{color:var(--green)}
+.m-val.red{color:var(--red)}
+.m-sub{font-size:.67rem;color:var(--muted);margin-top:.25rem;font-family:'Barlow Condensed',sans-serif}
+
+/* table */
+.tbl-wrap{overflow-x:auto;margin:1.8rem 0}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+thead tr{background:var(--dark)}
+thead th{text-align:left;padding:.8rem 1rem;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:700}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:rgba(255,205,17,.08)}
+tbody td{padding:.75rem 1rem;color:var(--steel);font-family:'Barlow Condensed',sans-serif;font-size:.88rem}
+tbody td:first-child{color:var(--dark);font-weight:600}
+.td-green{color:var(--green)!important;font-weight:700}
+.td-red{color:var(--red)!important;font-weight:700}
+.td-yellow{color:var(--yellow2)!important;font-weight:700}
+tr.hl{background:rgba(255,205,17,.12)!important}
+tr.hl td{color:var(--dark)!important;font-weight:700}
+
+/* numbered list — blueprint style */
+.numbered{list-style:none;margin:1.2rem 0}
+.numbered li{display:grid;grid-template-columns:50px 1fr;gap:.8rem;padding:1.2rem 0;border-bottom:1px solid var(--border);font-size:.88rem;color:var(--steel);line-height:1.75}
+.numbered li:last-child{border-bottom:none}
+.numbered li strong{color:var(--dark);font-weight:600;display:block;margin-bottom:.15rem;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;text-transform:uppercase;letter-spacing:.03em}
+.n-num{font-family:'Black Han Sans',sans-serif;font-size:1.4rem;color:var(--yellow);background:var(--dark);display:flex;align-items:center;justify-content:center;height:36px;width:36px;flex-shrink:0}
+
+/* bullets */
+.bullets{list-style:none;margin:1rem 0}
+.bullets li{padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.88rem;color:var(--steel);display:flex;gap:.8rem;line-height:1.7}
+.bullets li:last-child{border-bottom:none}
+.bullets li::before{content:'▶';color:var(--yellow);flex-shrink:0;font-size:.55rem;margin-top:.35rem}
+.bullets li strong{color:var(--dark);font-weight:600}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+.chip{padding:.3rem .85rem;background:var(--white);border:1px solid var(--border);font-size:.7rem;color:var(--steel);transition:all .2s;font-family:'Barlow Condensed',sans-serif;letter-spacing:.03em;font-weight:600}
+.chip:hover{background:var(--yellow);border-color:var(--yellow);color:var(--dark)}
+
+.divider{width:100%;margin:3rem 0;border:none;border-top:1px solid var(--border)}
+
+/* VERDICT BOX */
+.verdict{background:var(--dark);margin-top:3rem;position:relative;overflow:hidden}
+.verdict::before{content:'CAT';position:absolute;right:-20px;top:-20px;font-family:'Black Han Sans',sans-serif;font-size:10rem;color:rgba(255,205,17,.04);line-height:1;pointer-events:none}
+.verdict-header{background:var(--yellow);padding:1.2rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.verdict-header-title{font-family:'Black Han Sans',sans-serif;font-size:1.3rem;color:var(--dark);letter-spacing:.05em}
+.verdict-header-badge{background:var(--dark);padding:.3rem .9rem;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);font-weight:700}
+.verdict-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,.06)}
+.verdict-cell{background:var(--dark);padding:1.5rem;text-align:center}
+.vc-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:.5rem;font-weight:700}
+.vc-val{font-family:'Black Han Sans',sans-serif;font-size:2.2rem;line-height:1}
+.vc-sub{font-size:.68rem;color:rgba(255,255,255,.3);margin-top:.3rem;font-family:'Barlow Condensed',sans-serif}
+.verdict-reasons{padding:1.5rem 2rem}
+.verdict-reasons-title{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:1rem;font-weight:700}
+.vr-item{display:flex;gap:1rem;align-items:flex-start;margin-bottom:.9rem}
+.vr-num{width:22px;height:22px;background:var(--yellow);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:900;color:var(--dark)}
+.vr-text{font-size:.83rem;color:rgba(255,255,255,.6);line-height:1.6}
+.vr-text strong{color:#fff}
+.verdict-risk{padding:1rem 2rem;background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.06);display:flex;gap:.8rem;align-items:center}
+.vr-dot{width:8px;height:8px;background:#facc15;flex-shrink:0}
+.vr-risk-text{font-size:.72rem;color:rgba(255,255,255,.35);line-height:1.5}
+.vr-risk-text strong{color:rgba(255,255,255,.5)}
+
+.disclaimer{font-size:.7rem;color:var(--muted);line-height:1.7;padding:1.2rem;background:var(--cream);border:1px solid var(--border);margin-top:2rem;font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em}
+
+/* MASCOT */
+#mascot{position:fixed;right:2%;top:50%;transform:translateY(-50%);z-index:300;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.m-emoji{font-size:2.4rem;display:block;animation:catBob 2s ease-in-out infinite}
+@keyframes catBob{0%,100%{transform:translateY(0) scaleX(1)}50%{transform:translateY(-8px) scaleX(1.05)}}
+.m-speech{background:var(--dark);border:2px solid var(--yellow);padding:.55rem .85rem;font-size:.68rem;color:#fff;line-height:1.5;max-width:150px;text-align:center;position:relative;transition:opacity .35s,transform .35s;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.02em}
+.m-speech::after{content:'';position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--yellow)}
+@media(max-width:900px){#mascot{display:none}}
+
+/* REVEAL */
+.rev{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.rev.on{opacity:1;transform:translateY(0)}
+
+/* FOOTER */
+footer{background:var(--dark);padding:2rem 4%;display:flex;justify-content:space-between;align-items:center;border-top:4px solid var(--yellow)}
+footer span{font-size:.7rem;color:rgba(255,255,255,.35);font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em}
+footer a{font-size:.7rem;color:rgba(255,255,255,.35);text-decoration:none;transition:color .3s;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em}
+footer a:hover{color:var(--yellow)}
+
+@media(max-width:1100px){
+  #body-wrap{grid-template-columns:1fr}
+  #left-sidebar,#right-sidebar{position:static;height:auto}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .hero-rating-strip{flex-wrap:wrap}
+  .hrs-cell{min-width:50%}
+  .img-split{grid-template-columns:1fr}
+  .img-split.flip{direction:ltr}
+  .verdict-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cring"></div>
+<div id="spbar"></div>
+
+<!-- CONSTRUCTION INTRO -->
+<div id="intro">
+  <div class="intro-sparks" id="sparks"></div>
+  <div class="intro-hat">🪖</div>
+  <div class="intro-cat">CAT</div>
+  <div class="intro-sub">Caterpillar Inc. · NYSE: CAT · Equity Research</div>
+  <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+  <button class="intro-skip" onclick="skipIntro()">Skip →</button>
+</div>
+
+<!-- BULLDOZER MASCOT -->
+<div id="mascot">
+  <div class="m-speech" id="mspeech">🚜 Breaking ground on this analysis!</div>
+  <span class="m-emoji" id="memoji">🚜</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-cat-badge">CAT</div>
+    <a href="portfolio8.html" class="nav-logo">Madhav Arora</a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#headwinds">Headwinds</a></li>
+    <li><a href="#financials">Financials</a></li>
+    <li><a href="#valuation">Valuation</a></li>
+  </ul>
+  <a href="https://calendly.com/madhav00027/30min" target="_blank" class="nav-cta">Book a Call</a>
+</nav>
+
+<!-- FULL BLEED YELLOW HERO -->
+<section id="hero">
+  <div>
+    <div class="hero-eyebrow">NYSE: CAT · Equity Research · Industrials · Heavy Machinery</div>
+    <div class="hero-headline">
+      <span>THE</span>
+      <span>MACHINE</span>
+      <span class="outline">THAT</span>
+      <span>BUILDS</span>
+      <span class="outline">THE</span>
+      <span>WORLD</span>
+    </div>
+    <p class="hero-sub">Caterpillar builds the equipment that constructs roads, mines minerals, powers cities and shapes civilisation. But right now the stock is under pressure — and the market might be wrong.</p>
+    <div class="hero-author-bar">
+      <div class="auth-av">
+        <img src="photo.png" alt="Madhav Arora" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <span class="ini" style="display:none">MA</span>
+      </div>
+      <div>
+        <div class="auth-name">Madhav Arora · Financial Analyst</div>
+        <div class="auth-date">April 2026 &nbsp;·&nbsp; 14 min read &nbsp;·&nbsp; For illustrative purposes only</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DARK RATING STRIP at bottom of hero -->
+  <div class="hero-rating-strip">
+    <div class="hrs-cell accent">
+      <div class="hrs-lbl">Rating</div>
+      <div class="hrs-val" style="color:#facc15">HOLD</div>
+    </div>
+    <div class="hrs-cell">
+      <div class="hrs-lbl">Current Price</div>
+      <div class="hrs-val">$718.90</div>
+    </div>
+    <div class="hrs-cell">
+      <div class="hrs-lbl">12M Target</div>
+      <div class="hrs-val green">$360</div>
+    </div>
+    <div class="hrs-cell">
+      <div class="hrs-lbl">Upside</div>
+      <div class="hrs-val green">+26.3%</div>
+    </div>
+    <div class="hrs-cell">
+      <div class="hrs-lbl">Mkt Cap</div>
+      <div class="hrs-val">$145bn</div>
+    </div>
+    <div class="hrs-cell">
+      <div class="hrs-lbl">Div Yield</div>
+      <div class="hrs-val">1.8%</div>
+    </div>
+    <div class="hrs-cell">
+      <div class="hrs-lbl">P/E Ratio</div>
+      <div class="hrs-val">15.2x</div>
+    </div>
+    <div class="hrs-cell">
+      <div class="hrs-lbl">Exchange</div>
+      <div class="hrs-val">NYSE</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 COLUMN BODY -->
+<div id="body-wrap">
+
+  <!-- LEFT SIDEBAR — dark, key stats -->
+  <aside id="left-sidebar">
+    <div class="ls-section">
+      <div class="ls-title">At a Glance</div>
+      <div class="ls-row"><span class="lk">Ticker</span><span class="lv yellow">NYSE: CAT</span></div>
+      <div class="ls-row"><span class="lk">Sector</span><span class="lv">Industrials</span></div>
+      <div class="ls-row"><span class="lk">Founded</span><span class="lv">1925</span></div>
+      <div class="ls-row"><span class="lk">HQ</span><span class="lv">Irving, TX</span></div>
+      <div class="ls-row"><span class="lk">Employees</span><span class="lv">109,600</span></div>
+      <div class="ls-row"><span class="lk">Analyst</span><span class="lv">Madhav Arora</span></div>
+      <div class="ls-row"><span class="lk">Rating</span><span class="lv" style="color:#facc15">HOLD</span></div>
+      <div class="ls-row"><span class="lk">Target</span><span class="lv green">$737</span></div>
+      <div class="ls-row"><span class="lk">Upside</span><span class="lv" style="color:#facc15">+2.5%</span></div>
+    </div>
+
+    <div class="ls-section">
+      <div class="ls-title">Key Numbers</div>
+      <div class="big-stat">
+        <div class="bn">$67.6bn</div>
+        <div class="bl">TTM Revenue</div>
+      </div>
+      <div class="big-stat">
+        <div class="bn">$9.5bn</div>
+        <div class="bl">Operating Profit TTM</div>
+      </div>
+      <div class="big-stat">
+        <div class="bn">$18.90</div>
+        <div class="bl">EPS (Trailing)</div>
+      </div>
+      <div class="big-stat">
+        <div class="bn">118K</div>
+        <div class="bl">Employees (2026)</div>
+      </div>
+    </div>
+
+    <div class="ls-section">
+      <div class="ls-title">Upcoming Events</div>
+      <div class="ls-row"><span class="lk">Q1 Results</span><span class="lv">23 Apr 2026</span></div>
+      <div class="ls-row"><span class="lk">AGM</span><span class="lv">14 Jun 2026</span></div>
+      <div class="ls-row"><span class="lk">Ex-Div</span><span class="lv yellow">22 Jul 2026</span></div>
+      <div class="ls-row"><span class="lk">H1 Results</span><span class="lv">5 Aug 2026</span></div>
+    </div>
+
+    <div class="ls-section" style="text-align:center">
+      <div class="ls-title">Discuss This Research</div>
+      <a href="https://calendly.com/madhav00027/30min" target="_blank" style="display:block;background:var(--yellow);color:var(--dark);padding:.7rem;text-decoration:none;font-size:.75rem;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.6rem">📅 Book a Call</a>
+      <a href="/cdn-cgi/l/email-protection#5b363a3f333a2d3a2934293a6a696a681b3c363a323775383436" style="display:block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;padding:.7rem;text-decoration:none;font-size:.75rem;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase">✉️ Email Me</a>
+    </div>
+  </aside>
+
+  <!-- MAIN ARTICLE -->
+  <main id="main-col">
+
+    <h2 class="h2" id="overview">The Story in Plain English</h2>
+    <p class="p">Picture the biggest, most powerful machines you have ever seen. The yellow giants at a construction site. The colossal excavators at a mine. The engines powering backup generators when the lights go out. <strong>Almost all of them have a yellow CAT badge on them.</strong></p>
+    <p class="p">Caterpillar is the world's largest manufacturer of construction and mining equipment. Founded in 1925 through the merger of two California tractor companies, CAT has spent a century building the machines that build everything else — roads, skyscrapers, railways, dams, ports, mines.</p>
+
+    <div class="callout">
+      Without Caterpillar, the modern world stops being built. <em>That is not a slogan — it is an economic fact.</em>
+    </div>
+
+    <p class="p rev">But right now, the stock is under pressure. A slowdown in construction activity, a cautious US housing market, and global trade tensions have spooked investors. CAT is down meaningfully from its 2024 highs — and we think the market is being far too pessimistic about a company with unmatched competitive position and pricing power.</p>
+
+    <div class="img-full rev">
+      <img src="diageo/cat-chart1.png" alt="CAT Revenue Trend" onerror="this.parentElement.style.display='none'"/>
+      <p class="img-caption">// CAT Revenue & Operating Profit FY2020–FY2025E — Upload as cat-chart1.png</p>
+    </div>
+
+    <hr class="divider"/>
+
+    <h2 class="h2" id="headwinds">What's Weighing On The Stock?</h2>
+
+    <div class="img-split rev">
+      <img src="diageo/cat-chart2.png" alt="Headwinds Chart" onerror="this.parentElement.style.display='none'"/>
+      <div class="split-body">
+        <h4>Key Pressures Ranked</h4>
+        <p>Three main forces are hitting CAT simultaneously — construction slowdown, dealer destocking, and global trade uncertainty. Upload your risk chart as <strong>cat-chart2.png</strong></p>
+      </div>
+    </div>
+
+    <ol class="numbered rev">
+      <li>
+        <span class="n-num">01</span>
+        <div><strong>Construction Slowdown (8/10)</strong> Higher interest rates from 2022-2024 crushed the US housing market and slowed large infrastructure projects. Fewer projects = fewer machines needed. CAT's construction segment felt this hard.</div>
+      </li>
+      <li>
+        <span class="n-num">02</span>
+        <div><strong>Dealer Destocking (7/10)</strong> During COVID, dealers over-ordered machines to meet demand. They are now working through that excess inventory rather than ordering fresh units from CAT — the same pattern that hit Diageo's distributors.</div>
+      </li>
+      <li>
+        <span class="n-num">03</span>
+        <div><strong>US Trade Tariffs (7/10)</strong> CAT manufactures globally and sells globally. New tariffs raise input costs and risk retaliatory measures from key markets including China — which accounts for roughly 5-7% of sales.</div>
+      </li>
+      <li>
+        <span class="n-num">04</span>
+        <div><strong>Mining Capex Caution (6/10)</strong> Mining companies are being more conservative on capital spending amid commodity price uncertainty. This weighs on CAT's high-margin Resource Industries segment.</div>
+      </li>
+      <li>
+        <span class="n-num">05</span>
+        <div><strong>Valuation Premium (5/10)</strong> Even after the pullback, CAT trades at a slight premium to industrial peers. If earnings disappoint, there is room for a further de-rating before the stock becomes undeniably cheap.</div>
+      </li>
+    </ol>
+
+    <hr class="divider"/>
+
+    <h2 class="h2" id="financials">The Numbers: Why CAT Is Still A Monster</h2>
+    <p class="p rev">Despite the headwinds, Caterpillar generated <strong>$67.6bn in revenue</strong> and a <strong>14.0% operating margin</strong> in FY2024 — among the best in industrials. The balance sheet is strong, cash flow is enormous, and the dividend has been raised for 30 consecutive years.</p>
+
+    <div class="metrics rev">
+      <div class="metric featured">
+        <div class="m-lbl">Revenue</div>
+        <div class="m-val">$64bn</div>
+        <div class="m-sub">FY2024 Actual</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Operating Margin</div>
+        <div class="m-val green">16.9%</div>
+        <div class="m-sub">Best-in-class</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Free Cash Flow</div>
+        <div class="m-val">$9.2bn</div>
+        <div class="m-sub">TTM</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">EPS</div>
+        <div class="m-val">$18.90</div>
+        <div class="m-sub">FY2024</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Div Growth</div>
+        <div class="m-val green">30yrs</div>
+        <div class="m-sub">Consecutive raises</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Buybacks</div>
+        <div class="m-val">$5bn</div>
+        <div class="m-sub">FY2024 programme</div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap rev">
+      <table>
+        <thead><tr><th>Metric</th><th>FY2022</th><th>FY2023</th><th>FY2024</th><th>FY2025E</th><th>FY2026E</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue ($bn)</td><td>59.4</td><td>67.1</td><td>67.6</td><td class="td-yellow">63.5</td><td class="td-green">70.2</td></tr>
+          <tr><td>Op. Profit ($bn)</td><td>8.5</td><td>11.4</td><td>9.5</td><td class="td-yellow">8.8</td><td class="td-green">11.2</td></tr>
+          <tr><td>Op. Margin (%)</td><td>14.3</td><td>17.0</td><td>14.0</td><td class="td-yellow">13.8</td><td class="td-green">16.0</td></tr>
+          <tr><td>EPS ($)</td><td>13.84</td><td>20.12</td><td>18.90</td><td class="td-yellow">22.76</td><td class="td-green">27.74</td></tr>
+          <tr><td>FCF ($bn)</td><td>5.8</td><td>8.7</td><td>9.2</td><td class="td-yellow">8.5</td><td class="td-green">10.1</td></tr>
+          <tr><td>Dividend ($)</td><td>4.62</td><td>5.20</td><td>5.92</td><td class="td-green">6.44</td><td class="td-green">7.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="highlight rev">
+      ⚡ CAT has returned over $30bn to shareholders through buybacks and dividends in the last 5 years alone — while still investing heavily in R&D for autonomous and electric machines.
+    </div>
+
+    <hr class="divider"/>
+
+    <h2 class="h2" id="valuation">Valuation: The Market Is Pricing In Disaster</h2>
+    <p class="p rev">At <strong>~18x forward earnings</strong>, CAT is trading below its 5-year historical average of 17-18x. The market is pricing in a prolonged construction downturn — but infrastructure spending from the US Infrastructure Act alone provides a multi-year tailwind that the bears are ignoring.</p>
+
+    <div class="img-split flip rev">
+      <img src="diageo/cat-chart3.png" alt="Valuation Chart" onerror="this.parentElement.style.display='none'"/>
+      <div class="split-body">
+        <h4>Below Historical Average</h4>
+        <p>CAT's 15.2x P/E is below the 5-year average of 17-18x. Upload your valuation chart as <strong>cat-chart3.png</strong></p>
+      </div>
+    </div>
+
+    <h3 class="h3">Price Target Summary</h3>
+    <div class="tbl-wrap rev">
+      <table>
+        <thead><tr><th>Method</th><th>Implied Price</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td>P/E Re-rating (17x)</td><td>$770</td><td>17x FY2026E EPS of $22.76</td></tr>
+          <tr><td>DCF Analysis</td><td>$720</td><td>8.5% WACC, 3% terminal growth</td></tr>
+          <tr><td>EV/EBITDA (12x)</td><td>$745</td><td>12x FY2027E EBITDA</td></tr>
+          <tr><td>Analyst Consensus</td><td>$737</td><td>MarketBeat Consensus (Apr 2026)</td></tr>
+          <tr class="hl"><td>OUR BLENDED TARGET</td><td>$737</td><td>Fair Value — Better Entry at $620–$650</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="divider"/>
+
+    <h2 class="h2" id="call">My Recommendation — The Analyst's Call</h2>
+    <ul class="bullets rev">
+      <li><strong>This is a HOLD, not a Buy.</strong> CAT is one of the best businesses in America. But at ~18x forward earnings with only 2.5% upside to consensus target, the risk/reward is simply not compelling enough right now.</li>
+      <li><strong>Wait for a better entry point.</strong> A pullback to $620–$650 on tariff concerns or a construction slowdown would be a much better entry. Patient investors should watch and wait — that entry gives 10–15% upside plus the dividend.</li>
+      <li><strong>The services story is real and powerful.</strong> $24bn in services revenue today, growing toward $30bn by 2030. When the market re-rates this as recurring revenue, it could justify a higher multiple. Long-term bulls have a real case.</li>
+      <li><strong>Dividend growth is excellent.</strong> 30 consecutive years of dividend increases. The 1.8% yield is modest but the growth trajectory is outstanding — this is a stock that rewards patient holders.</li>
+      <li><strong>Watch earnings on April 23, 2026.</strong> Q1 results will be the first real test of tariff impact on margins. Any guidance cut could push the stock toward our target entry of $650 — that is when we get aggressive.</li>
+    </ul>
+
+    <hr class="divider"/>
+
+    <h3 class="h3">Tools & Methods</h3>
+    <div class="chips rev">
+      <span class="chip">DCF Analysis</span>
+      <span class="chip">P/E Multiples</span>
+      <span class="chip">EV/EBITDA</span>
+      <span class="chip">Bloomberg Terminal</span>
+      <span class="chip">CAT Annual Reports</span>
+      <span class="chip">Stockopedia</span>
+      <span class="chip">Segment Analysis</span>
+      <span class="chip">Microsoft Excel</span>
+    </div>
+
+    <!-- VERDICT BOX -->
+    <!-- POWER QUOTE -->
+    <div class="rev" style="background:var(--yellow);padding:2rem 2.5rem;margin-top:3rem;position:relative;border-left:6px solid var(--dark)">
+      <div style="font-family:'Black Han Sans',sans-serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(26,26,26,0.45);margin-bottom:.8rem">The One-Line Verdict</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.1rem,2vw,1.5rem);font-weight:700;color:var(--dark);line-height:1.5;font-style:italic">"CAT is one of the greatest industrial businesses ever built. But even the best companies can be the wrong trade at the wrong price. At $718, fair value is $737 — that is not a margin of safety. That is a hold."</div>
+      <div style="margin-top:.8rem;font-size:.72rem;font-family:'Barlow Condensed',sans-serif;color:rgba(26,26,26,0.5);letter-spacing:.08em;text-transform:uppercase">— Madhav Arora · April 2026</div>
+    </div>
+
+    <div class="verdict rev">
+      <div class="verdict-header">
+        <div class="verdict-header-title">THE ANALYST VERDICT</div>
+        <div class="verdict-header-badge">APRIL 2026</div>
+      </div>
+      <div class="verdict-grid">
+        <div class="verdict-cell">
+          <div class="vc-lbl">Rating</div>
+          <div class="vc-val" style="color:#facc15">HOLD</div>
+          <div class="vc-sub">Fairly Valued</div>
+        </div>
+        <div class="verdict-cell" style="border-left:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06)">
+          <div class="vc-lbl">Fair Value Target</div>
+          <div class="vc-val" style="color:#4ade80">$737</div>
+          <div class="vc-sub">+2.5% upside only</div>
+        </div>
+        <div class="verdict-cell">
+          <div class="vc-lbl">Best Entry Point</div>
+          <div class="vc-val" style="color:#facc15">$650</div>
+          <div class="vc-sub">On tariff pullback</div>
+        </div>
+      </div>
+      <div class="verdict-reasons">
+        <div class="verdict-reasons-title">Why We're Holding — Not Buying</div>
+        <div class="vr-item">
+          <div class="vr-num">1</div>
+          <div class="vr-text"><strong>Only 2.5% upside to consensus — not enough margin of safety.</strong> At $718.90, CAT is trading close to fair value. Taking on cyclical and tariff risk for 2.5% upside makes no sense when cash pays more.</div>
+        </div>
+        <div class="vr-item">
+          <div class="vr-num">2</div>
+          <div class="vr-text"><strong>Tariff impact on Q1 margins is still unknown.</strong> April 23 earnings will be the first real test. A guidance cut could push the stock to $620–$650 — a far better entry with genuine upside of 10–15%.</div>
+        </div>
+        <div class="vr-item">
+          <div class="vr-num">3</div>
+          <div class="vr-text"><strong>The business is exceptional — the price is not.</strong> CAT deserves a premium multiple long-term. But patience now means a better return later. We watch, we wait, and we buy the dip when it comes.</div>
+        </div>
+      </div>
+      <div class="verdict-risk">
+        <div class="vr-dot"></div>
+        <div class="vr-risk-text"><strong>Trigger to Upgrade to BUY:</strong> A pullback to $620–$650 on tariff fears or weak Q1 guidance on April 23, 2026. At that level, upside to $737 consensus = 13%+ plus 1.8% dividend = compelling total return.</div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      // DISCLAIMER: This document is prepared for informational and educational purposes only and does not constitute investment advice or a recommendation to buy or sell any security. All data sourced from Caterpillar Inc. public filings, Bloomberg, Stockopedia and other public sources as at April 2026. Prices quoted in USD. Past performance is not indicative of future results.
+    </div>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside id="right-sidebar">
+
+    <div class="rs-section">
+      <div class="rs-title">Revenue by Segment</div>
+      <canvas id="segChart" style="max-height:150px"></canvas>
+      <div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.8rem;font-size:.75rem;font-family:'Barlow Condensed',sans-serif">
+        <div><span style="display:inline-block;width:8px;height:8px;background:#FFCD11;margin-right:6px"></span>Construction <strong>43%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;background:#1A1A1A;margin-right:6px"></span>Resource Ind. <strong>22%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;background:#888;margin-right:6px"></span>Energy & Trans. <strong>24%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;background:#bbb;margin-right:6px"></span>Financial Svcs <strong>11%</strong></div>
+      </div>
+    </div>
+
+    <div class="rs-section">
+      <div class="rs-title">12-Month Price Chart</div>
+      <canvas id="priceChart" style="max-height:130px"></canvas>
+      <div style="display:flex;justify-content:space-between;margin-top:.6rem;font-size:.75rem;font-family:'Barlow Condensed',sans-serif">
+        <span style="color:var(--muted)">52W Low: <strong style="color:var(--dark)">$560</strong></span>
+        <span style="color:var(--muted)">52W High: <strong style="color:var(--dark)">$789</strong></span>
+      </div>
+    </div>
+
+    <div class="rs-section">
+      <div class="rs-title">Risk Assessment</div>
+      <div class="risk-item">
+        <div class="risk-label-row"><span>Construction Slowdown</span><span style="color:var(--red);font-weight:700">8/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:80%;background:var(--red)"></div></div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-label-row"><span>Dealer Destocking</span><span style="color:var(--red);font-weight:700">7/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:70%;background:#E05C4B"></div></div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-label-row"><span>Trade Tariffs</span><span style="color:var(--amber);font-weight:700">7/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:70%;background:var(--amber)"></div></div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-label-row"><span>Mining Capex</span><span style="color:var(--amber);font-weight:700">6/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:60%;background:var(--amber)"></div></div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-label-row"><span>Valuation Risk</span><span style="color:var(--green);font-weight:700">5/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:50%;background:var(--green)"></div></div>
+      </div>
+    </div>
+
+    <div class="rs-section">
+      <div class="rs-title">Peer Comparison</div>
+      <div style="display:flex;flex-direction:column;gap:.4rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.75rem;font-family:'Barlow Condensed',sans-serif">
+          <span style="font-weight:700">CAT</span>
+          <span style="background:var(--yellow);padding:.15rem .5rem;font-weight:700;font-size:.68rem">18.1x</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.75rem;font-family:'Barlow Condensed',sans-serif">
+          <span>Deere & Co</span><span style="color:var(--muted)">19.2x</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.75rem;font-family:'Barlow Condensed',sans-serif">
+          <span>Komatsu</span><span style="color:var(--muted)">18.5x</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;font-size:.75rem;font-family:'Barlow Condensed',sans-serif">
+          <span>CNH Industrial</span><span style="color:var(--muted)">14.1x</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<footer>
+  <span>© 2026 Madhav Arora — Financial Analyst</span>
+  <a href="portfolio8.html">← Back to Portfolio</a>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* INTRO */
+document.body.style.overflow='hidden';
+
+// create sparks
+var sparksEl=document.getElementById('sparks');
+for(var i=0;i<30;i++){
+  var sp=document.createElement('div');
+  sp.className='spark';
+  var ang=Math.random()*360;
+  var dist=Math.random()*150+50;
+  sp.style.cssText='left:calc(50% + '+(Math.random()*40-20)+'px);top:calc(50% - 40px);--sx:'+Math.cos(ang*Math.PI/180)*dist+'px;--dy:'+Math.sin(ang*Math.PI/180)*dist+'px;animation-delay:'+(Math.random()*.3+0.85)+'s;';
+  sparksEl.appendChild(sp);
+}
+
+function skipIntro(){
+  document.getElementById('intro').classList.add('hide');
+  setTimeout(function(){document.body.style.overflow='';},900);
+}
+setTimeout(skipIntro,3200);
+
+/* CURSOR */
+var cur=document.getElementById('cur'),cr=document.getElementById('cring'),mx=0,my=0,rx=0,ry=0,con=false;
+document.addEventListener('mousemove',function(e){
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  if(!con){cur.style.opacity='1';cr.style.opacity='1';con=true;}
+});
+(function rl(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(rl);})();
+document.addEventListener('mouseleave',function(){cur.style.opacity='0';cr.style.opacity='0';con=false;});
+document.addEventListener('mouseenter',function(){if(con){cur.style.opacity='1';cr.style.opacity='1';}});
+document.querySelectorAll('a,.metric,.chip').forEach(function(el){
+  el.addEventListener('mouseenter',function(){cur.style.width='0';cr.style.width='50px';cr.style.height='50px';cr.style.borderColor='rgba(26,26,26,0.9)';});
+  el.addEventListener('mouseleave',function(){cur.style.width='12px';cur.style.height='12px';cr.style.width='38px';cr.style.height='38px';cr.style.borderColor='rgba(26,26,26,0.5)';});
+});
+
+/* SCROLL PROGRESS */
+window.addEventListener('scroll',function(){
+  var p=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  document.getElementById('spbar').style.width=p+'%';
+  updateMascot(p);
+},{passive:true});
+
+/* BULLDOZER MASCOT */
+var sp2=document.getElementById('mspeech'),em=document.getElementById('memoji'),ms=document.getElementById('mascot');
+var msgs=[
+  {p:0, e:'🚜',t:'Breaking ground on this analysis!'},
+  {p:8, e:'🪖',t:'Founded 1925. 100 years of building the world!'},
+  {p:20,e:'⚠️', t:'Construction slowdown? The market is spooked...'},
+  {p:33,e:'🔩',t:'Dealers over-ordered. Now destocking. Temporary!'},
+  {p:46,e:'💪',t:'$64bn revenue. 14% margin. Still a monster.'},
+  {p:58,e:'📊',t:'15.2x P/E — below its 5-year average!'},
+  {p:70,e:'🏗️', t:'Infrastructure supercycle has decades to run!'},
+  {p:82,e:'✅',t:'Target: $737. Only 2.5% upside. We HOLD and wait!'},
+  {p:94,e:'🚜',t:'Time to build a position! Book a call with Madhav!'},
+];
+var li=-1;
+function updateMascot(p){
+  ms.style.top=Math.max(12,Math.min(80,15+p*.65))+'%';
+  var idx=0;
+  for(var i=0;i<msgs.length;i++){if(p>=msgs[i].p)idx=i;}
+  if(idx===li)return;li=idx;
+  sp2.style.opacity='0';sp2.style.transform='translateY(6px)';
+  (function(m){setTimeout(function(){sp2.textContent=m.t;em.textContent=m.e;sp2.style.opacity='1';sp2.style.transform='translateY(0)';},300);})(msgs[idx]);
+}
+
+/* SEGMENT DONUT */
+Chart.defaults.font.family='Barlow Condensed';
+new Chart(document.getElementById('segChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Construction','Resource Ind.','Energy & Trans.','Financial Svcs'],
+    datasets:[{data:[43,22,24,11],backgroundColor:['#FFCD11','#1A1A1A','#888','#ccc'],borderColor:var_paper(),borderWidth:2,hoverOffset:4}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed+'%';}}}}}
+});
+function var_paper(){return '#F0EDE4';}
+
+/* PRICE CHART */
+new Chart(document.getElementById('priceChart'),{
+  type:'line',
+  data:{
+    labels:['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    datasets:[{
+      data:[565,590,640,680,720,760,789,750,730,710,680,700,718],
+      borderColor:'#FFCD11',backgroundColor:'rgba(255,205,17,0.08)',
+      fill:true,tension:.4,borderWidth:2.5,pointRadius:0
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1A1A1A',borderColor:'rgba(255,205,17,0.4)',borderWidth:1}},
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:9},color:'#888'}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:9},color:'#888',callback:function(v){return '$'+v;}}}
+    }
+  }
+});
+
+/* SCROLL REVEAL */
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target);}
+  });
+},{threshold:0.07});
+document.querySelectorAll('.rev').forEach(function(el){obs.observe(el);});
+</script>
+</body>
+</html>
