@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Airbnb Inc. (NASDAQ: ABNB) — Don't Check In Yet | Madhav Arora</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --coral:   #FF385C;
+  --coral2:  #E0284C;
+  --pink:    #FFE8EC;
+  --warm:    #FFF8F6;
+  --cream:   #FFF0EE;
+  --dark:    #1A1A2E;
+  --mid:     #3D3D5C;
+  --muted:   #9999AA;
+  --border:  rgba(26,26,46,0.08);
+  --green:   #00A86B;
+  --amber:   #F59E0B;
+  --white:   #FFFFFF;
+}
+html{scroll-behavior:smooth}
+body{background:var(--warm);color:var(--dark);font-family:'Syne',sans-serif;overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cur{position:fixed;width:10px;height:10px;background:var(--coral);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;opacity:0;top:0;left:0}
+#cring{position:fixed;width:36px;height:36px;border:2px solid rgba(255,56,92,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .28s,height .28s;opacity:0;top:0;left:0}
+@media(max-width:768px){body{cursor:auto}#cur,#cring{display:none}}
+
+/* PROGRESS */
+#spbar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--coral),#FF6B8A);width:0%;z-index:9999;pointer-events:none;box-shadow:0 0 8px rgba(255,56,92,0.5)}
+
+/* ═══ INTRO ═══ */
+#intro{
+  position:fixed;inset:0;z-index:9000;
+  background:var(--dark);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;
+  transition:opacity .9s ease;
+}
+#intro.hide{opacity:0;pointer-events:none}
+.intro-home{font-size:7rem;animation:homeDrop .9s cubic-bezier(.36,.07,.19,.97) forwards;transform:translateY(-100px);opacity:0}
+@keyframes homeDrop{0%{transform:translateY(-100px) scale(0.5);opacity:0}65%{transform:translateY(12px) scale(1.05);opacity:1}82%{transform:translateY(-6px) scale(0.98)}100%{transform:translateY(0) scale(1);opacity:1}}
+.intro-pulse{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid rgba(255,56,92,0.4);animation:pls 1s ease 1s forwards;opacity:0}
+@keyframes pls{0%{transform:scale(0.8);opacity:0.8}100%{transform:scale(3);opacity:0}}
+.intro-abnb{font-family:'Syne',sans-serif;font-size:clamp(3rem,12vw,10rem);font-weight:800;color:var(--coral);letter-spacing:-.03em;opacity:0;animation:typeIn .7s ease 1.1s forwards}
+@keyframes typeIn{from{opacity:0;letter-spacing:.3em;filter:blur(6px)}to{opacity:1;letter-spacing:-.03em;filter:blur(0)}}
+.intro-tag{font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:.2em;text-transform:uppercase;opacity:0;animation:fadeUp .5s ease 1.6s forwards;font-family:'Syne Mono',monospace}
+.intro-verdict{background:var(--coral);padding:.4rem 1.2rem;font-size:.75rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#fff;opacity:0;animation:fadeUp .5s ease 1.9s forwards;border-radius:50px}
+.intro-skip{position:absolute;bottom:2rem;right:2rem;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);cursor:pointer;background:none;border:none;font-family:'Syne',sans-serif;opacity:0;animation:fadeUp .4s ease 2.2s forwards;transition:color .3s}
+.intro-skip:hover{color:var(--coral)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ NAV ═══ */
+nav{
+  position:fixed;top:3px;width:100%;z-index:600;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:.9rem 4%;
+  background:rgba(255,248,246,0.97);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+}
+.nav-left{display:flex;align-items:center;gap:1rem}
+.nav-badge{background:var(--coral);color:#fff;padding:.3rem .8rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;border-radius:50px}
+.nav-logo{font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dark);text-decoration:none}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--coral)}
+.nav-cta{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--dark);color:#fff;padding:.55rem 1.3rem;border-radius:50px;text-decoration:none;transition:background .2s}
+.nav-cta:hover{background:var(--coral)}
+
+/* ═══ HERO ═══ */
+#hero{min-height:100vh;background:var(--dark);display:flex;flex-direction:column;padding:100px 4% 0;position:relative;overflow:hidden}
+
+/* floating circles bg */
+.hero-circle{position:absolute;border-radius:50%;pointer-events:none}
+.hc1{width:600px;height:600px;background:rgba(255,56,92,0.06);top:-150px;right:-150px}
+.hc2{width:300px;height:300px;background:rgba(255,56,92,0.04);bottom:100px;left:-80px}
+.hc3{width:150px;height:150px;background:rgba(255,56,92,0.08);top:200px;right:200px}
+
+.hero-top{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;z-index:1}
+
+.hero-left{}
+.hero-eyebrow{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1.2rem;font-family:'Syne Mono',monospace;display:flex;align-items:center;gap:.6rem}
+.hero-eyebrow::before{content:'▶';color:var(--coral);font-size:.5rem}
+.hero-title{font-size:clamp(3rem,8vw,8rem);font-weight:800;line-height:.88;color:#fff;margin-bottom:1rem;letter-spacing:-.02em}
+.hero-title .coral{color:var(--coral)}
+.hero-title .thin{font-weight:400;font-family:'Lora',serif;font-style:italic;color:rgba(255,255,255,.5)}
+.hero-desc{font-size:.92rem;line-height:1.8;color:rgba(255,255,255,.45);max-width:480px;margin-bottom:2rem;font-weight:400}
+
+/* verdict pill row */
+.verdict-pills{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:2rem}
+.vp{padding:.5rem 1.1rem;border-radius:50px;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.vp.hold{background:var(--amber);color:#1a1a1a}
+.vp.price{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.1)}
+.vp.target{background:rgba(255,56,92,.15);color:var(--coral);border:1px solid rgba(255,56,92,.3)}
+.vp.down{background:rgba(255,56,92,.15);color:#FF8FA3;border:1px solid rgba(255,56,92,.2)}
+
+/* author */
+.hero-author{display:flex;align-items:center;gap:.8rem}
+.auth-av{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,56,92,0.4);overflow:hidden;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.auth-av img{width:100%;height:100%;object-fit:cover}
+.auth-ini{font-size:.8rem;font-weight:700;color:var(--coral)}
+.auth-name{font-size:.82rem;font-weight:600;color:rgba(255,255,255,.7)}
+.auth-date{font-size:.7rem;color:rgba(255,255,255,.3);font-family:'Syne Mono',monospace}
+
+/* hero right — live chart */
+.hero-right{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.8rem;display:flex;flex-direction:column;gap:1.2rem}
+.hr-top{display:flex;justify-content:space-between;align-items:flex-start}
+.hr-ticker{font-family:'Syne Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.35);letter-spacing:.1em}
+.hr-price{font-size:2.5rem;font-weight:800;color:#fff;line-height:1}
+.hr-chg{font-size:.78rem;color:#FF8FA3;margin-top:.2rem;font-family:'Syne Mono',monospace}
+.hr-chart-wrap{height:130px;position:relative}
+.hr-stats{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.hr-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:.8rem}
+.hr-stat .sl{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.3rem}
+.hr-stat .sv{font-size:1.1rem;font-weight:700;color:#fff}
+.hr-stat .sv.coral{color:var(--coral)}
+.hr-stat .sv.green{color:#4ade80}
+.hr-stat .sv.amber{color:#fbbf24}
+
+/* hero bottom strip */
+.hero-strip{background:var(--coral);display:flex;margin:0 -4%;padding:.8rem 4%}
+.hs-item{flex:1;text-align:center;padding:.3rem;border-right:1px solid rgba(255,255,255,.2)}
+.hs-item:last-child{border-right:none}
+.hs-lbl{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:.2rem}
+.hs-val{font-size:.95rem;font-weight:800;color:#fff}
+
+/* ═══ BODY ═══ */
+#body{display:grid;grid-template-columns:1fr 300px;gap:0;background:var(--warm)}
+
+/* MAIN */
+#main{padding:5vh 4%;border-right:1px solid var(--border)}
+
+/* ARTICLE ELEMENTS */
+.h2{font-size:clamp(1.4rem,2.5vw,2rem);font-weight:800;color:var(--dark);margin:4rem 0 1rem;padding-top:4rem;border-top:2px solid var(--coral);line-height:1.15;letter-spacing:-.01em}
+.h2:first-child{border-top:none;padding-top:0;margin-top:0}
+.h3{font-size:.82rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--coral);margin:1.5rem 0 .5rem;display:flex;align-items:center;gap:.5rem}
+.h3::before{content:'';width:16px;height:2px;background:var(--coral);flex-shrink:0}
+.p{font-size:.93rem;line-height:1.9;color:var(--mid);margin-bottom:.9rem;font-weight:400;font-family:'Lora',serif}
+.p strong{color:var(--dark);font-weight:600;font-family:'Syne',sans-serif}
+.p em{font-style:italic;color:var(--coral);font-family:'Lora',serif}
+
+/* callout */
+.callout{background:var(--pink);border:1px solid rgba(255,56,92,.15);border-left:4px solid var(--coral);padding:1.3rem 1.7rem;margin:2rem 0;font-family:'Lora',serif;font-style:italic;font-size:1rem;color:var(--dark);line-height:1.75}
+
+/* hold box */
+.hold-box{background:var(--dark);border-radius:12px;padding:1.5rem;margin:2rem 0;display:flex;gap:1rem;align-items:flex-start}
+.hold-icon{width:32px;height:32px;background:var(--amber);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+.hold-text{font-size:.85rem;color:rgba(255,255,255,.7);line-height:1.7;font-family:'Lora',serif}
+.hold-text strong{color:#fff;font-family:'Syne',sans-serif}
+
+/* image blocks */
+.img-full{margin:2rem 0}
+.img-full img{width:100%;border-radius:10px;border:1px solid var(--border);display:block}
+.img-caption{font-size:.7rem;color:var(--muted);margin-top:.5rem;font-family:'Syne Mono',monospace;letter-spacing:.03em}
+
+.img-split{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;margin:2rem 0}
+.img-split.flip{direction:rtl}
+.img-split.flip>*{direction:ltr}
+.img-split img{width:100%;border-radius:10px;border:1px solid var(--border)}
+.split-body h4{font-size:.88rem;font-weight:700;letter-spacing:.03em;color:var(--dark);margin-bottom:.5rem}
+.split-body p{font-size:.85rem;color:var(--mid);line-height:1.8;font-family:'Lora',serif}
+
+/* metrics — 3 col */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin:1.8rem 0;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.metric{background:var(--white);padding:1.1rem;text-align:center;transition:background .2s}
+.metric:hover{background:var(--pink)}
+.metric.feat{background:var(--coral)}
+.metric.feat .m-val,.metric.feat .m-lbl,.metric.feat .m-sub{color:#fff}
+.metric.feat:hover{background:var(--coral2)}
+.m-lbl{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;font-weight:700}
+.m-val{font-size:1.7rem;font-weight:800;color:var(--dark);line-height:1}
+.m-val.green{color:var(--green)}
+.m-val.red{color:var(--coral)}
+.m-val.amber{color:var(--amber)}
+.m-sub{font-size:.65rem;color:var(--muted);margin-top:.2rem;font-family:'Syne Mono',monospace}
+
+/* table */
+.tbl-wrap{overflow-x:auto;margin:1.8rem 0;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+thead tr{background:var(--dark)}
+thead th{text-align:left;padding:.75rem 1rem;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:700}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:var(--pink)}
+tbody td{padding:.7rem 1rem;color:var(--mid);font-family:'Syne Mono',monospace;font-size:.82rem}
+tbody td:first-child{color:var(--dark);font-weight:600;font-family:'Syne',sans-serif;font-size:.85rem}
+.td-green{color:var(--green)!important;font-weight:700}
+.td-red{color:var(--coral)!important;font-weight:700}
+.td-amber{color:var(--amber)!important;font-weight:700}
+tr.hl{background:var(--pink)!important}
+tr.hl td{color:var(--coral)!important;font-weight:700}
+
+/* numbered */
+.numbered{list-style:none;margin:1.2rem 0}
+.numbered li{display:grid;grid-template-columns:44px 1fr;gap:.8rem;padding:1.1rem 0;border-bottom:1px solid var(--border);font-size:.88rem;color:var(--mid);line-height:1.75;font-family:'Lora',serif}
+.numbered li:last-child{border-bottom:none}
+.numbered li strong{color:var(--dark);font-weight:700;display:block;margin-bottom:.1rem;font-family:'Syne',sans-serif;font-size:.85rem;letter-spacing:.01em}
+.n-num{width:32px;height:32px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.78rem;font-weight:800;color:#fff;margin-top:.15rem}
+
+/* bullets */
+.bullets{list-style:none;margin:1rem 0}
+.bullets li{padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.88rem;color:var(--mid);display:flex;gap:.8rem;line-height:1.7;font-family:'Lora',serif}
+.bullets li:last-child{border-bottom:none}
+.bullets li::before{content:'→';color:var(--coral);flex-shrink:0;font-weight:700}
+.bullets li strong{color:var(--dark);font-weight:700;font-family:'Syne',sans-serif}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+.chip{padding:.3rem .85rem;border-radius:50px;border:1px solid var(--border);font-size:.7rem;color:var(--mid);transition:all .2s;font-weight:600}
+.chip:hover{background:var(--coral);border-color:var(--coral);color:#fff}
+
+.divider{width:100%;margin:3rem 0;border:none;border-top:1px solid var(--border)}
+
+/* VERDICT BOX */
+.verdict{background:var(--dark);border-radius:16px;margin-top:3rem;overflow:hidden}
+.v-header{background:var(--coral);padding:1.2rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.v-header-title{font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:.03em}
+.v-header-badge{background:rgba(0,0,0,.2);padding:.3rem .9rem;border-radius:50px;font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#fff}
+.v-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,.06)}
+.v-cell{background:var(--dark);padding:1.4rem;text-align:center}
+.v-lbl{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.5rem;font-weight:700}
+.v-val{font-size:2.2rem;font-weight:800;line-height:1}
+.v-sub{font-size:.68rem;color:rgba(255,255,255,.3);margin-top:.3rem;font-family:'Syne Mono',monospace}
+.v-reasons{padding:1.5rem 2rem}
+.v-rtitle{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:1rem;font-weight:700}
+.vr{display:flex;gap:.9rem;align-items:flex-start;margin-bottom:.9rem}
+.vr-n{width:22px;height:22px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.65rem;font-weight:800;color:#fff}
+.vr-t{font-size:.83rem;color:rgba(255,255,255,.55);line-height:1.6;font-family:'Lora',serif}
+.vr-t strong{color:#fff;font-family:'Syne',sans-serif}
+.v-trigger{padding:1rem 2rem;background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.06);display:flex;gap:.8rem;align-items:center}
+.v-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.v-trigger-text{font-size:.72rem;color:rgba(255,255,255,.35);line-height:1.5;font-family:'Lora',serif}
+.v-trigger-text strong{color:rgba(255,255,255,.5);font-family:'Syne',sans-serif}
+
+/* POWER QUOTE */
+.power-quote{background:var(--pink);border-left:5px solid var(--coral);padding:2rem 2.5rem;margin:3rem 0;border-radius:0 12px 12px 0}
+.pq-label{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,56,92,.5);margin-bottom:.8rem;font-weight:700}
+.pq-text{font-family:'Lora',serif;font-style:italic;font-size:clamp(1rem,1.8vw,1.35rem);color:var(--dark);line-height:1.6;font-weight:600}
+.pq-attr{margin-top:.8rem;font-size:.72rem;color:var(--muted);font-family:'Syne Mono',monospace}
+
+.disclaimer{font-size:.7rem;color:var(--muted);line-height:1.7;padding:1.2rem;background:var(--cream);border:1px solid var(--border);border-radius:8px;margin-top:2rem;font-family:'Syne Mono',monospace}
+
+/* SIDEBAR */
+#sidebar{padding:4vh 1.5rem;background:var(--white);position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;display:flex;flex-direction:column;gap:1.2rem}
+#sidebar::-webkit-scrollbar{width:3px}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(255,56,92,.2);border-radius:0}
+.sb{background:var(--warm);border:1px solid var(--border);border-radius:10px;padding:1.1rem}
+.sb-title{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--coral);margin-bottom:.9rem;font-weight:700}
+.sb-row{display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid var(--border);font-size:.78rem}
+.sb-row:last-child{border-bottom:none}
+.sb-row .sk{color:var(--muted);font-family:'Syne Mono',monospace;font-size:.72rem}
+.sb-row .sv{font-weight:700;color:var(--dark)}
+.sb-row .sv.coral{color:var(--coral)}
+.sb-row .sv.green{color:var(--green)}
+.sb-row .sv.amber{color:var(--amber)}
+
+/* wacc table in sidebar */
+.wacc-item{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.75rem;font-family:'Syne Mono',monospace}
+.wacc-item:last-child{border-bottom:none}
+.wacc-item .wk{color:var(--muted)}
+.wacc-item .wv{font-weight:700;color:var(--dark)}
+.wacc-item.highlight .wk,.wacc-item.highlight .wv{color:var(--coral)}
+
+/* risk bars */
+.risk-item{margin-bottom:.75rem}
+.risk-lr{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:.3rem}
+.risk-track{height:5px;background:#eee;border-radius:3px;overflow:hidden}
+.risk-fill{height:100%;border-radius:3px}
+
+/* MASCOT */
+#mascot{position:fixed;right:2%;top:50%;transform:translateY(-50%);z-index:300;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.m-emoji{font-size:2.4rem;display:block;animation:mBob 2.5s ease-in-out infinite}
+@keyframes mBob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+.m-speech{background:var(--dark);border:2px solid var(--coral);border-radius:12px;padding:.55rem .85rem;font-size:.68rem;color:#fff;line-height:1.5;max-width:148px;text-align:center;position:relative;transition:opacity .35s,transform .35s;font-family:'Syne',sans-serif;font-weight:600}
+.m-speech::after{content:'';position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--coral)}
+@media(max-width:900px){#mascot{display:none}}
+
+/* REVEAL */
+.rev{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease}
+.rev.on{opacity:1;transform:translateY(0)}
+
+/* FOOTER */
+footer{background:var(--dark);padding:2rem 4%;display:flex;justify-content:space-between;align-items:center;border-top:3px solid var(--coral)}
+footer span{font-size:.7rem;color:rgba(255,255,255,.3);font-family:'Syne Mono',monospace}
+footer a{font-size:.7rem;color:rgba(255,255,255,.3);text-decoration:none;transition:color .3s;font-family:'Syne Mono',monospace}
+footer a:hover{color:var(--coral)}
+
+@media(max-width:900px){
+  #body{grid-template-columns:1fr}
+  #sidebar{position:static;height:auto}
+  .hero-top{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr 1fr}
+  .img-split{grid-template-columns:1fr}
+  .img-split.flip{direction:ltr}
+  .v-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cring"></div>
+<div id="spbar"></div>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="intro-pulse"></div>
+  <div class="intro-home">🏠</div>
+  <div class="intro-abnb">ABNB</div>
+  <div class="intro-tag">Airbnb Inc. · Nasdaq · Equity Research</div>
+  <div class="intro-verdict">HOLD — Don't Check In Yet</div>
+  <button class="intro-skip" onclick="skipIntro()">Skip →</button>
+</div>
+
+<!-- MASCOT -->
+<div id="mascot">
+  <div class="m-speech" id="mspeech">🏠 Welcome! Let's analyse Airbnb together!</div>
+  <span class="m-emoji" id="memoji">🏠</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-badge">HOLD</div>
+    <a href="portfolio8.html" class="nav-logo">Madhav Arora</a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#risks">Risks</a></li>
+    <li><a href="#valuation">Valuation</a></li>
+    <li><a href="#verdict">Verdict</a></li>
+  </ul>
+  <a href="https://calendly.com/madhav00027/30min" target="_blank" class="nav-cta">Book a Call</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-circle hc1"></div>
+  <div class="hero-circle hc2"></div>
+  <div class="hero-circle hc3"></div>
+
+  <div class="hero-top">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Equity Research · Consumer Discretionary · Travel</div>
+      <h1 class="hero-title">
+        Don't<br>
+        <span class="coral">Check</span><br>
+        <span class="thin">In Yet.</span>
+      </h1>
+      <p class="hero-desc">Airbnb is a genuinely great business. But at $136, with tariffs crushing travel sentiment, an EPS miss, and only 8% upside to consensus — the risk/reward doesn't justify buying today.</p>
+
+      <div class="verdict-pills">
+        <span class="vp hold">⏸ HOLD</span>
+        <span class="vp price">$136.09</span>
+        <span class="vp target">Target $147</span>
+        <span class="vp down">Buy at $110–$115</span>
+      </div>
+
+      <div class="hero-author">
+        <div class="auth-av">
+          <img src="photo.png" alt="Madhav Arora" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <span class="auth-ini" style="display:none">MA</span>
+        </div>
+        <div>
+          <div class="auth-name">Madhav Arora · Financial Analyst</div>
+          <div class="auth-date">April 2026 · 14 min read · For illustrative purposes</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hr-top">
+        <div>
+          <div class="hr-ticker">NASDAQ: ABNB · USD</div>
+          <div class="hr-price">$136.09</div>
+          <div class="hr-chg">▲ +3.08% today · As of Apr 7, 2026</div>
+        </div>
+      </div>
+      <div class="hr-chart-wrap">
+        <canvas id="heroChart"></canvas>
+      </div>
+      <div class="hr-stats">
+        <div class="hr-stat">
+          <div class="sl">52W Low</div>
+          <div class="sv">$99.88</div>
+        </div>
+        <div class="hr-stat">
+          <div class="sl">52W High</div>
+          <div class="sv">$143.88</div>
+        </div>
+        <div class="hr-stat">
+          <div class="sl">Market Cap</div>
+          <div class="sv">$79.8bn</div>
+        </div>
+        <div class="hr-stat">
+          <div class="sl">Analyst Target</div>
+          <div class="sv amber">$147.13</div>
+        </div>
+        <div class="hr-stat">
+          <div class="sl">EPS (TTM)</div>
+          <div class="sv">$4.10</div>
+        </div>
+        <div class="hr-stat">
+          <div class="sl">Next Earnings</div>
+          <div class="sv coral">13 May 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-strip">
+    <div class="hs-item"><div class="hs-lbl">Rating</div><div class="hs-val">HOLD</div></div>
+    <div class="hs-item"><div class="hs-lbl">Current Price</div><div class="hs-val">$136.09</div></div>
+    <div class="hs-item"><div class="hs-lbl">12M Target</div><div class="hs-val">$147.13</div></div>
+    <div class="hs-item"><div class="hs-lbl">Upside</div><div class="hs-val">+8.1%</div></div>
+    <div class="hs-item"><div class="hs-lbl">Best Entry</div><div class="hs-val">$110–$115</div></div>
+    <div class="hs-item"><div class="hs-lbl">Sector</div><div class="hs-val">Cons. Disc.</div></div>
+    <div class="hs-item"><div class="hs-lbl">Exchange</div><div class="hs-val">NASDAQ</div></div>
+  </div>
+</section>
+
+<!-- BODY -->
+<div id="body">
+  <main id="main">
+
+    <h2 class="h2" id="overview">The Story in Plain English</h2>
+    <p class="p">Airbnb did something remarkable — it convinced millions of people to open their homes to strangers and millions more to prefer that experience over a hotel room. Founded in 2008, it turned a spare air mattress in a San Francisco apartment into a global platform with <strong>8 million active listings in 220+ countries</strong>.</p>
+    <p class="p rev">The business model is elegant. Airbnb takes roughly <strong>3% from hosts and 6–15% from guests</strong> for every booking. No hotels to own. No staff to house guests. Pure platform economics with extraordinary free cash flow generation.</p>
+
+    <div class="callout">
+      Airbnb didn't just disrupt hotels — it created an entirely new category of travel. The question is not whether the business is great. The question is whether the current price reflects that greatness fairly.
+    </div>
+
+    <p class="p rev">The answer, at $136, is that it does. <strong>There is simply not enough margin of safety to buy today.</strong> With only 8% upside to consensus, tariff headwinds building, an EPS miss last quarter, and city after city tightening regulations — patient investors should wait for a better entry point.</p>
+
+    <div class="img-full rev">
+      <img src="diageo/abnb-chart1.png" alt="ABNB Revenue Trend" onerror="this.parentElement.style.display='none'"/>
+      <p class="img-caption">// ABNB Revenue & EBITDA Trend FY2020–FY2025 · Upload as abnb-chart1.png</p>
+    </div>
+
+    <hr class="divider"/>
+
+    <h2 class="h2" id="risks">Why We're Holding — The 5 Headwinds</h2>
+
+    <div class="img-split rev">
+      <img src="diageo/abnb-chart2.png" alt="Risk Chart" onerror="this.parentElement.style.display='none'"/>
+      <div class="split-body">
+        <h4>Headwinds Ranked by Severity</h4>
+        <p>Five forces are weighing on ABNB simultaneously. The tariff-driven travel slowdown is the most dangerous near-term risk — it directly hits Airbnb's discretionary, cross-border revenue base. Upload your chart as <strong>abnb-chart2.png</strong></p>
+      </div>
+    </div>
+
+    <ol class="numbered rev">
+      <li><span class="n-num">01</span><div><strong>Tariff-Driven Travel Slowdown (8/10)</strong> Morningstar cut their Airbnb revenue growth forecast from 10% to just 5% for 2025 following Trump's tariff announcements. Consumer sentiment dropped to its lowest since November 2022. Cross-border travel — Airbnb's sweet spot — is the most sensitive to geopolitical and economic uncertainty.</div></li>
+      <li><span class="n-num">02</span><div><strong>EPS Miss &amp; Shorter Booking Windows (7/10)</strong> Last quarter ABNB reported EPS of $0.56 vs $0.67 expected — a meaningful miss. The CFO flagged that guests are booking closer to check-in dates, a classic signal of consumer caution and uncertainty about future travel plans.</div></li>
+      <li><span class="n-num">03</span><div><strong>Regulatory Tightening Globally (7/10)</strong> Barcelona has announced a 2028 ban on tourist apartments. Paris, Amsterdam, New York and dozens of other cities continue tightening short-term rental rules. Every city that restricts Airbnb is a permanent, structural revenue headwind that compounds over time.</div></li>
+      <li><span class="n-num">04</span><div><strong>Valuation Premium vs Peers (6/10)</strong> ABNB trades at a significant premium to the travel sector. At $136, the EV to Sales ratio is far above competitors. With limited margin expansion expected and earnings growth below the industry average of 24%, the premium is hard to justify today.</div></li>
+      <li><span class="n-num">05</span><div><strong>Competition Intensifying (5/10)</strong> Booking.com holds 35% market share vs Airbnb's 26%. Hotels have adapted — offering more unique, home-like experiences. Vrbo is growing. The competitive moat, while real, is narrower than the market believes.</div></li>
+    </ol>
+
+    <hr class="divider"/>
+
+    <h2 class="h2">The Bull Case — Why This Is HOLD, Not SELL</h2>
+    <p class="p rev">We are not SELLING Airbnb. The fundamentals are genuinely strong and the long-term thesis is intact. Here is why we respect the bull case:</p>
+
+    <ul class="bullets rev">
+      <li><strong>14–16% revenue growth guided for Q1 2026.</strong> Management is confident. AI-powered customer service, Reserve Now Pay Later, and product improvements are gaining traction.</li>
+      <li><strong>Zero debt, massive cash pile.</strong> Airbnb has a fortress balance sheet. In a recession, this is the company that survives and emerges stronger — just like Amazon through the dot-com crash.</li>
+      <li><strong>Cross-border travel surged 20% in 2025.</strong> Asia-Pacific and Latin America are booming. Long-term stays and digital nomad demand are structural, not cyclical.</li>
+      <li><strong>AI-native travel platform strategy.</strong> Airbnb is rebuilding its product around AI — personalised search, smarter pricing for hosts, automated support. This is a genuine differentiator vs Booking.com.</li>
+      <li><strong>$2bn+ buyback programme.</strong> Management is buying back stock aggressively — a signal they believe the stock is undervalued. We agree at $110. Not at $136.</li>
+    </ul>
+
+    <div class="hold-box rev">
+      <div class="hold-icon">⏸</div>
+      <div class="hold-text"><strong>The Hold Thesis in One Sentence:</strong> Airbnb is a world-class business trading at a fair price — and fair price is not a buying opportunity. We want to pay less than fair value. That chance will come.</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <h2 class="h2" id="valuation">Valuation — The Numbers</h2>
+    <p class="p rev">At $136, the stock is trading near consensus fair value. All valuation methodologies converge around $140–$150. That leaves a minimal margin of safety for a high-growth, discretionary, regulatory-exposed business.</p>
+
+    <div class="metrics rev">
+      <div class="metric feat">
+        <div class="m-lbl">Current Price</div>
+        <div class="m-val">$136</div>
+        <div class="m-sub">NASDAQ: ABNB</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Revenue TTM</div>
+        <div class="m-val">$12.2bn</div>
+        <div class="m-sub">+12% YoY</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">EBITDA Margin</div>
+        <div class="m-val green">35%</div>
+        <div class="m-sub">FY2026E</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">EPS (TTM)</div>
+        <div class="m-val">$4.10</div>
+        <div class="m-sub">Missed est. last Q</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">EPS FY2026E</div>
+        <div class="m-val green">$5.05</div>
+        <div class="m-sub">Analyst consensus</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Upside to Target</div>
+        <div class="m-val amber">+8.1%</div>
+        <div class="m-sub">Not enough</div>
+      </div>
+    </div>
+
+    <h3 class="h3">Price Target Summary</h3>
+    <div class="tbl-wrap rev">
+      <table>
+        <thead><tr><th>Method</th><th>Implied Price</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td>DCF (Base Case)</td><td>$144</td><td>9.6% WACC · 2% terminal growth</td></tr>
+          <tr><td>EV/EBITDA Multiple</td><td>$138</td><td>12x FY2026E EBITDA of $4.8bn</td></tr>
+          <tr><td>P/E Re-rating</td><td>$152</td><td>30x FY2026E EPS of $5.05</td></tr>
+          <tr><td>Analyst Consensus</td><td>$147</td><td>TipRanks · 28 analysts (Apr 2026)</td></tr>
+          <tr class="hl"><td>OUR BLENDED TARGET</td><td>$147</td><td>Fair Value — Best Entry $110–$115</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="img-split flip rev">
+      <img src="diageo/abnb-chart3.png" alt="Football Field Valuation" onerror="this.parentElement.style.display='none'"/>
+      <div class="split-body">
+        <h4>Football Field Valuation</h4>
+        <p>All methodologies cluster around $138–$152. At $136 the stock sits at the low end of fair value — not undervalued enough to buy aggressively. Upload your chart as <strong>abnb-chart3.png</strong></p>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <h2 class="h2">Key Financial Data</h2>
+    <div class="tbl-wrap rev">
+      <table>
+        <thead><tr><th>Metric</th><th>FY2021</th><th>FY2022</th><th>FY2023</th><th>FY2024</th><th>FY2025E</th><th>FY2026E</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue ($bn)</td><td>5.99</td><td>8.40</td><td>9.92</td><td>11.0</td><td class="td-amber">11.6</td><td class="td-green">12.8</td></tr>
+          <tr><td>EBITDA ($bn)</td><td>0.39</td><td>2.18</td><td>3.37</td><td>3.78</td><td class="td-amber">3.90</td><td class="td-green">4.80</td></tr>
+          <tr><td>EBITDA Margin</td><td>6.5%</td><td>26.0%</td><td>34.0%</td><td>34.4%</td><td class="td-amber">33.6%</td><td class="td-green">37.5%</td></tr>
+          <tr><td>EPS ($)</td><td>-0.57</td><td>2.79</td><td>3.73</td><td>4.10</td><td class="td-amber">4.53</td><td class="td-green">5.05</td></tr>
+          <tr><td>FCF ($bn)</td><td>2.3</td><td>3.4</td><td>4.2</td><td>4.5</td><td class="td-amber">4.2</td><td class="td-green">5.1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="divider"/>
+
+    <h3 class="h3">Tools &amp; Methods</h3>
+    <div class="chips rev">
+      <span class="chip">DCF Analysis</span>
+      <span class="chip">EV/EBITDA</span>
+      <span class="chip">P/E Multiples</span>
+      <span class="chip">Football Field</span>
+      <span class="chip">Bloomberg</span>
+      <span class="chip">Morningstar</span>
+      <span class="chip">Yahoo Finance</span>
+      <span class="chip">TipRanks</span>
+      <span class="chip">ABNB 10-K</span>
+      <span class="chip">Microsoft Excel</span>
+    </div>
+
+    <!-- POWER QUOTE -->
+    <div class="power-quote rev" id="verdict">
+      <div class="pq-label">The One-Line Verdict</div>
+      <div class="pq-text">"Airbnb is a world-class business at a world-class price — and world-class price is not where you make your money. Wait for the dip to $110, then check in."</div>
+      <div class="pq-attr">— Madhav Arora · April 2026</div>
+    </div>
+
+    <!-- VERDICT BOX -->
+    <div class="verdict rev">
+      <div class="v-header">
+        <div class="v-header-title">THE ANALYST VERDICT</div>
+        <div class="v-header-badge">APRIL 2026</div>
+      </div>
+      <div class="v-grid">
+        <div class="v-cell">
+          <div class="v-lbl">Rating</div>
+          <div class="v-val" style="color:var(--amber)">HOLD</div>
+          <div class="v-sub">Fairly valued</div>
+        </div>
+        <div class="v-cell" style="border-left:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06)">
+          <div class="v-lbl">Fair Value Target</div>
+          <div class="v-val" style="color:#4ade80">$147</div>
+          <div class="v-sub">+8.1% upside only</div>
+        </div>
+        <div class="v-cell">
+          <div class="v-lbl">Best Entry Point</div>
+          <div class="v-val" style="color:var(--coral)">$110</div>
+          <div class="v-sub">On tariff pullback</div>
+        </div>
+      </div>
+      <div class="v-reasons">
+        <div class="v-rtitle">Why We're Holding — Not Buying</div>
+        <div class="vr">
+          <div class="vr-n">1</div>
+          <div class="vr-t"><strong>Only 8% upside — not enough for the risk.</strong> Tariff uncertainty, EPS misses and regulatory headwinds all demand a margin of safety. 8% upside does not provide one.</div>
+        </div>
+        <div class="vr">
+          <div class="vr-n">2</div>
+          <div class="vr-t"><strong>Booking windows are shrinking — consumers are nervous.</strong> When guests book last-minute it signals caution. That caution will weigh on forward earnings guidance on May 13.</div>
+        </div>
+        <div class="vr">
+          <div class="vr-n">3</div>
+          <div class="vr-t"><strong>The business is great. The entry point is not.</strong> Patience at $136 means a better return later. At $110–$115, upside to $147 becomes 28%+ — that is when we buy aggressively.</div>
+        </div>
+      </div>
+      <div class="v-trigger">
+        <div class="v-dot"></div>
+        <div class="v-trigger-text"><strong>Upgrade Trigger:</strong> A pullback to $110–$115 on tariff escalation or weak May 13 earnings guidance. At that level, risk/reward becomes compelling — 28%+ upside with a fortress balance sheet protecting downside.</div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      // DISCLAIMER: This document is for informational and educational purposes only and does not constitute investment advice. All data sourced from Airbnb Inc. public filings, Bloomberg, Morningstar, TipRanks, Yahoo Finance and other public sources as at April 2026. Past performance is not indicative of future results.
+    </div>
+
+  </main>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+
+    <div class="sb">
+      <div class="sb-title">At a Glance</div>
+      <div class="sb-row"><span class="sk">Ticker</span><span class="sv coral">NASDAQ: ABNB</span></div>
+      <div class="sb-row"><span class="sk">Sector</span><span class="sv">Cons. Discretionary</span></div>
+      <div class="sb-row"><span class="sk">Founded</span><span class="sv">2008</span></div>
+      <div class="sb-row"><span class="sk">CEO</span><span class="sv">Brian Chesky</span></div>
+      <div class="sb-row"><span class="sk">Rating</span><span class="sv amber">HOLD</span></div>
+      <div class="sb-row"><span class="sk">Target</span><span class="sv green">$147</span></div>
+      <div class="sb-row"><span class="sk">Best Entry</span><span class="sv coral">$110–$115</span></div>
+      <div class="sb-row"><span class="sk">Analyst</span><span class="sv">Madhav Arora</span></div>
+    </div>
+
+    <div class="sb">
+      <div class="sb-title">Revenue by Geography</div>
+      <canvas id="geoChart" style="max-height:140px"></canvas>
+      <div style="display:flex;flex-direction:column;gap:.35rem;margin-top:.8rem;font-size:.72rem;font-family:'Syne Mono',monospace">
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--coral);margin-right:6px"></span>North America <strong>50%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF8FA3;margin-right:6px"></span>EMEA <strong>35%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FFB8C6;margin-right:6px"></span>Latin America <strong>8%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FFD6DE;margin-right:6px"></span>Asia Pacific <strong>7%</strong></div>
+      </div>
+    </div>
+
+    <div class="sb">
+      <div class="sb-title">WACC Breakdown</div>
+      <div class="wacc-item"><span class="wk">Risk Free Rate</span><span class="wv">3.88%</span></div>
+      <div class="wacc-item"><span class="wk">Equity Risk Prem.</span><span class="wv">5.91%</span></div>
+      <div class="wacc-item"><span class="wk">Beta</span><span class="wv">1.34</span></div>
+      <div class="wacc-item"><span class="wk">Cost of Equity</span><span class="wv">11.82%</span></div>
+      <div class="wacc-item"><span class="wk">AT Cost of Debt</span><span class="wv">5.85%</span></div>
+      <div class="wacc-item highlight"><span class="wk">WACC</span><span class="wv">11.69%</span></div>
+    </div>
+
+    <div class="sb">
+      <div class="sb-title">Risk Assessment</div>
+      <div class="risk-item">
+        <div class="risk-lr"><span style="font-size:.72rem">Tariff / Travel Demand</span><span style="color:var(--coral);font-weight:700;font-size:.72rem">8/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:80%;background:var(--coral)"></div></div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-lr"><span style="font-size:.72rem">EPS Miss / Guidance</span><span style="color:var(--coral);font-weight:700;font-size:.72rem">7/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:70%;background:#FF6B8A"></div></div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-lr"><span style="font-size:.72rem">Regulatory Bans</span><span style="color:var(--amber);font-weight:700;font-size:.72rem">7/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:70%;background:var(--amber)"></div></div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-lr"><span style="font-size:.72rem">Valuation Premium</span><span style="color:var(--amber);font-weight:700;font-size:.72rem">6/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:60%;background:var(--amber)"></div></div>
+      </div>
+      <div class="risk-item">
+        <div class="risk-lr"><span style="font-size:.72rem">Competition</span><span style="color:var(--green);font-weight:700;font-size:.72rem">5/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:50%;background:var(--green)"></div></div>
+      </div>
+    </div>
+
+    <div class="sb">
+      <div class="sb-title">Key Dates</div>
+      <div class="sb-row"><span class="sk">Next Earnings</span><span class="sv coral">13 May 2026</span></div>
+      <div class="sb-row"><span class="sk">Q1 Revenue Est.</span><span class="sv">$2.24bn</span></div>
+      <div class="sb-row"><span class="sk">Q1 EPS Est.</span><span class="sv">$0.31</span></div>
+      <div class="sb-row"><span class="sk">Annual Div.</span><span class="sv">None</span></div>
+    </div>
+
+    <div class="sb" style="text-align:center">
+      <div class="sb-title">Discuss This Research</div>
+      <a href="https://calendly.com/madhav00027/30min" target="_blank" style="display:block;background:var(--coral);color:#fff;padding:.7rem;border-radius:8px;text-decoration:none;font-size:.75rem;font-weight:700;margin-bottom:.6rem;letter-spacing:.05em">📅 Book a Call</a>
+      <a href="mailto:madhavarora1213@gmail.com" style="display:block;background:var(--warm);border:1px solid var(--border);color:var(--dark);padding:.7rem;border-radius:8px;text-decoration:none;font-size:.75rem;font-weight:700;letter-spacing:.05em">✉️ Email Me</a>
+    </div>
+
+  </aside>
+</div>
+
+<footer>
+  <span>© 2026 Madhav Arora — Financial Analyst</span>
+  <a href="portfolio8.html">← Back to Portfolio</a>
+</footer>
+
+<script>
+/* INTRO */
+document.body.style.overflow='hidden';
+function skipIntro(){
+  document.getElementById('intro').classList.add('hide');
+  setTimeout(function(){document.body.style.overflow='';},900);
+}
+setTimeout(skipIntro,3200);
+
+/* CURSOR */
+var cur=document.getElementById('cur'),cr=document.getElementById('cring'),mx=0,my=0,rx=0,ry=0,con=false;
+document.addEventListener('mousemove',function(e){
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  if(!con){cur.style.opacity='1';cr.style.opacity='1';con=true;}
+});
+(function rl(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(rl);})();
+document.addEventListener('mouseleave',function(){cur.style.opacity='0';cr.style.opacity='0';con=false;});
+document.addEventListener('mouseenter',function(){if(con){cur.style.opacity='1';cr.style.opacity='1';}});
+document.querySelectorAll('a,.metric,.chip').forEach(function(el){
+  el.addEventListener('mouseenter',function(){cur.style.width='0';cr.style.width='50px';cr.style.height='50px';cr.style.borderColor='rgba(255,56,92,0.9)';});
+  el.addEventListener('mouseleave',function(){cur.style.width='10px';cur.style.height='10px';cr.style.width='36px';cr.style.height='36px';cr.style.borderColor='rgba(255,56,92,0.4)';});
+});
+
+/* SCROLL PROGRESS */
+window.addEventListener('scroll',function(){
+  var p=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  document.getElementById('spbar').style.width=p+'%';
+  updateMascot(p);
+},{passive:true});
+
+/* MASCOT */
+var sp=document.getElementById('mspeech'),em=document.getElementById('memoji'),ms=document.getElementById('mascot');
+var msgs=[
+  {p:0, e:'🏠',t:'Welcome! Let\'s analyse Airbnb together!'},
+  {p:8, e:'📖',t:'Founded 2008. Turned a spare room into a $79bn company!'},
+  {p:20,e:'😰',t:'Tariffs hitting travel demand hard. Revenue growth cut to 5%...'},
+  {p:33,e:'📉',t:'EPS miss last quarter. $0.56 vs $0.67 expected. Ouch.'},
+  {p:46,e:'🏗️', t:'Barcelona banning tourist apartments by 2028. Regulatory risk is real!'},
+  {p:58,e:'🤔',t:'Only 8% upside to $147 consensus. Not enough margin of safety.'},
+  {p:70,e:'💡',t:'But the business IS great. Zero debt. $5bn FCF. AI strategy.'},
+  {p:82,e:'⏸', t:'HOLD at $136. Wait for $110–$115. Then we check in!'},
+  {p:94,e:'🏠',t:'Don\'t check in yet! Book a call with Madhav first!'},
+];
+var li=-1;
+function updateMascot(p){
+  ms.style.top=Math.max(12,Math.min(80,15+p*.65))+'%';
+  var idx=0;
+  for(var i=0;i<msgs.length;i++){if(p>=msgs[i].p)idx=i;}
+  if(idx===li)return;li=idx;
+  sp.style.opacity='0';sp.style.transform='translateY(6px)';
+  (function(m){setTimeout(function(){sp.textContent=m.t;em.textContent=m.e;sp.style.opacity='1';sp.style.transform='translateY(0)';},300);})(msgs[idx]);
+}
+
+/* HERO CHART */
+Chart.defaults.color='rgba(255,255,255,0.4)';
+Chart.defaults.font.family='Syne Mono';
+new Chart(document.getElementById('heroChart'),{
+  type:'line',
+  data:{
+    labels:['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    datasets:[{
+      data:[118,125,132,140,138,130,122,115,108,112,130,140,136],
+      borderColor:'#FF385C',
+      backgroundColor:'rgba(255,56,92,0.08)',
+      fill:true,tension:.4,borderWidth:2.5,pointRadius:0
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1A1A2E',borderColor:'rgba(255,56,92,0.3)',borderWidth:1}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:9},color:'rgba(255,255,255,0.3)'}},
+      y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:9},color:'rgba(255,255,255,0.3)',callback:function(v){return '$'+v;}}}
+    }
+  }
+});
+
+/* GEO DONUT */
+Chart.defaults.color='#9999AA';
+new Chart(document.getElementById('geoChart'),{
+  type:'doughnut',
+  data:{
+    labels:['North America','EMEA','Latin America','Asia Pacific'],
+    datasets:[{data:[50,35,8,7],backgroundColor:['#FF385C','#FF8FA3','#FFB8C6','#FFD6DE'],borderColor:'#fff',borderWidth:2,hoverOffset:4}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed+'%';}}}}}
+});
+
+/* SCROLL REVEAL */
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target);}});
+},{threshold:0.07});
+document.querySelectorAll('.rev').forEach(function(el){obs.observe(el);});
+</script>
+</body>
+</html>
