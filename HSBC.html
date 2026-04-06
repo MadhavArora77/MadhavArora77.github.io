@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HSBC (LSE: HSBA) — The Bank That Bet On China | Madhav Arora</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:     #FAFAFA;
+  --bg2:    #F4F1EC;
+  --red:    #CC0000;
+  --red2:   #A80000;
+  --dark:   #111111;
+  --mid:    #444444;
+  --muted:  #888888;
+  --border: rgba(0,0,0,0.08);
+  --green:  #16A34A;
+  --amber:  #D97706;
+  --white:  #FFFFFF;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--dark);font-family:'Inter',sans-serif;overflow-x:hidden;cursor:none;padding-bottom:0}
+
+/* CURSOR */
+#cur{position:fixed;width:10px;height:10px;background:var(--red);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;opacity:0;top:0;left:0}
+#cring{position:fixed;width:36px;height:36px;border:1.5px solid rgba(200,0,0,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .28s,height .28s,border-color .28s;opacity:0;top:0;left:0}
+@media(max-width:768px){body{cursor:auto}#cur,#cring{display:none}}
+
+/* SCROLL PROGRESS */
+#spbar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#CC0000,#FF4444);width:0%;z-index:9999;pointer-events:none}
+
+/* ═══ NAV ═══ */
+nav{
+  position:fixed;top:3px;width:100%;z-index:600;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1rem 4%;
+  background:rgba(250,250,250,0.96);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+}
+.nav-left{display:flex;align-items:center;gap:14px}
+.nav-hex{width:30px;height:30px;background:var(--red);display:flex;align-items:center;justify-content:center;border-radius:4px}
+.nav-hex span{color:#fff;font-size:14px;font-weight:700}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.15em;color:var(--dark);text-decoration:none}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--red)}
+.nav-cta{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;background:var(--red);color:#fff;padding:.5rem 1.2rem;border-radius:50px;text-decoration:none;font-weight:600;transition:background .2s}
+.nav-cta:hover{background:var(--red2)}
+
+/* ═══ INTRO ANIMATION ═══ */
+#intro{
+  position:fixed;inset:0;z-index:9000;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;
+  transition:opacity .8s ease;
+}
+#intro.hide{opacity:0;pointer-events:none}
+.intro-dollar{font-size:8rem;animation:dollarBounce 1s ease forwards}
+@keyframes dollarBounce{
+  0%{transform:translateY(-80px) scale(0.5);opacity:0}
+  60%{transform:translateY(10px) scale(1.1);opacity:1}
+  80%{transform:translateY(-5px) scale(0.98)}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+.intro-ring{
+  position:absolute;width:160px;height:160px;border-radius:50%;
+  border:2px solid rgba(200,0,0,0.2);
+  animation:ringPulse 1s ease 0.8s forwards;opacity:0;
+}
+@keyframes ringPulse{
+  0%{transform:scale(0.5);opacity:0}
+  50%{opacity:1}
+  100%{transform:scale(2.5);opacity:0}
+}
+.intro-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,6vw,5rem);color:var(--dark);letter-spacing:.1em;opacity:0;animation:fadeUp .6s ease 1s forwards}
+.intro-sub{font-size:.78rem;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;opacity:0;animation:fadeUp .5s ease 1.4s forwards}
+.intro-skip{position:absolute;bottom:2rem;right:2rem;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif;opacity:0;animation:fadeUp .4s ease 1.8s forwards;transition:color .3s}
+.intro-skip:hover{color:var(--red)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ SPLIT HERO ═══ */
+#hero{
+  min-height:100vh;
+  display:grid;grid-template-columns:1fr 1fr;
+  padding-top:64px;
+}
+
+/* LEFT hero */
+.hero-left{
+  background:var(--dark);
+  padding:5% 5% 5% 5%;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;overflow:hidden;
+}
+.hero-left::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(200,0,0,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(200,0,0,0.05) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;
+}
+.hero-left::after{
+  content:'';position:absolute;top:-20%;right:-10%;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,0,0,0.12),transparent 65%);
+  pointer-events:none;
+}
+.hero-tag{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--red);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;position:relative;z-index:1}
+.hero-tag::before{content:'';width:20px;height:1px;background:var(--red)}
+.hero-company{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,12vw,14rem);line-height:.85;color:#fff;position:relative;z-index:1;margin-bottom:.2rem}
+.hero-tagline{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(.9rem,1.5vw,1.3rem);color:rgba(255,255,255,0.45);margin-bottom:2.5rem;position:relative;z-index:1}
+.rating-strip{display:flex;gap:8px;position:relative;z-index:1;flex-wrap:wrap}
+.r-pill{padding:.6rem 1.2rem;border-radius:6px;text-align:center}
+.r-pill.buy{background:var(--red)}
+.r-pill.buy .r-val{color:#fff;font-size:1.1rem;font-weight:700;font-family:'Bebas Neue',sans-serif;letter-spacing:.05em}
+.r-pill.dark{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1)}
+.r-pill.dark .r-val{color:#fff;font-size:1.1rem;font-weight:600;font-family:'Bebas Neue',sans-serif}
+.r-pill .r-lbl{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;opacity:.6;color:#fff}
+.r-pill.green-val .r-val{color:#4ade80}
+
+/* RIGHT hero */
+.hero-right{
+  background:var(--white);
+  padding:5%;
+  display:flex;flex-direction:column;gap:1.2rem;
+  border-left:1px solid var(--border);
+}
+.live-label{font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:.5rem}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* chart box */
+.chart-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+.chart-box-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
+.chart-box-title{font-size:.82rem;font-weight:600;color:var(--dark)}
+.chart-box-val{font-size:1.4rem;font-weight:700;color:var(--dark);font-family:'Bebas Neue',sans-serif}
+.chart-box-chg{font-size:.75rem;color:var(--green);font-weight:600}
+canvas{max-height:120px}
+
+/* stat grid */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.stat-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.stat-card .s-lbl{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.stat-card .s-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--dark);line-height:1}
+.stat-card .s-val.red{color:var(--red)}
+.stat-card .s-val.green{color:var(--green)}
+.stat-card .s-sub{font-size:.68rem;color:var(--muted);margin-top:.2rem}
+
+/* author */
+.hero-author{display:flex;align-items:center;gap:.9rem;padding-top:1rem;border-top:1px solid var(--border);margin-top:auto}
+.author-av{width:38px;height:38px;border-radius:50%;border:2px solid rgba(200,0,0,0.3);overflow:hidden;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center}
+.author-av img{width:100%;height:100%;object-fit:cover}
+.author-av .ini{font-size:.85rem;font-weight:700;color:var(--red)}
+.author-name{font-size:.85rem;font-weight:500;color:var(--dark);margin-bottom:.1rem}
+.author-date{font-size:.7rem;color:var(--muted)}
+
+/* ═══ TWO-COLUMN BODY ═══ */
+#body-wrap{display:grid;grid-template-columns:1fr 340px;min-height:100vh}
+
+/* MAIN ARTICLE */
+#main-col{padding:5vh 4%;border-right:1px solid var(--border)}
+
+/* SIDEBAR */
+#sidebar{
+  padding:4vh 1.5rem;background:var(--white);
+  position:sticky;top:64px;height:calc(100vh - 64px);
+  overflow-y:auto;display:flex;flex-direction:column;gap:1.2rem;
+}
+#sidebar::-webkit-scrollbar{width:3px}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(200,0,0,0.2);border-radius:2px}
+
+.sb-section{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+.sb-title{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:.9rem;font-weight:600}
+.sb-row{display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.8rem}
+.sb-row:last-child{border-bottom:none}
+.sb-row .sk{color:var(--muted)}
+.sb-row .sv{font-weight:500;color:var(--dark)}
+.sb-row .sv.red{color:var(--red)}
+.sb-row .sv.green{color:var(--green)}
+.sb-row .sv.amber{color:var(--amber)}
+
+/* risk bar */
+.risk-bar-wrap{margin-top:.6rem}
+.risk-label{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-bottom:.4rem}
+.risk-track{background:#eee;border-radius:4px;height:8px;overflow:hidden}
+.risk-fill{height:100%;border-radius:4px;transition:width 1s ease}
+
+/* china donut */
+.donut-wrap{display:flex;align-items:center;gap:1rem;margin-top:.5rem}
+.donut-labels{display:flex;flex-direction:column;gap:.4rem;font-size:.75rem}
+.donut-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.4rem}
+
+/* dollar mascot */
+#mascot{position:fixed;right:2%;top:50%;transform:translateY(-50%);z-index:300;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.m-emoji{font-size:2.4rem;display:block;animation:mBob 2.5s ease-in-out infinite}
+@keyframes mBob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+.m-speech{background:var(--dark);border:1px solid rgba(200,0,0,0.5);border-radius:10px;padding:.55rem .85rem;font-size:.68rem;color:#fff;line-height:1.5;max-width:145px;text-align:center;position:relative;transition:opacity .35s,transform .35s}
+.m-speech::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid rgba(200,0,0,0.5)}
+@media(max-width:900px){#mascot{display:none}}
+
+/* ═══ ARTICLE ELEMENTS ═══ */
+.h2{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,2.5vw,2rem);color:var(--dark);margin:3.5rem 0 1rem;padding-top:3.5rem;border-top:2px solid var(--border);line-height:1.2}
+.h2:first-child{border-top:none;padding-top:0;margin-top:0}
+.h3{font-size:.88rem;font-weight:600;color:var(--red);margin:1.5rem 0 .5rem;letter-spacing:.03em;text-transform:uppercase}
+.p{font-size:.93rem;line-height:1.9;color:var(--mid);margin-bottom:.9rem}
+.p strong{color:var(--dark);font-weight:600}
+.p em{font-style:italic;color:var(--red)}
+
+.callout{background:var(--bg2);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:1.2rem 1.6rem;margin:2rem 0;font-family:'Playfair Display',serif;font-style:italic;font-size:.98rem;color:var(--dark);line-height:1.75}
+
+.img-full{margin:2rem 0}
+.img-full img{width:100%;border-radius:12px;border:1px solid var(--border);display:block}
+.img-caption{font-size:.72rem;color:var(--muted);margin-top:.5rem;text-align:center;font-style:italic}
+
+.img-split{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;margin:2rem 0}
+.img-split.flip{direction:rtl}
+.img-split.flip>*{direction:ltr}
+.img-split img{width:100%;border-radius:10px;border:1px solid var(--border)}
+.split-body h4{font-size:.92rem;font-weight:600;color:var(--dark);margin-bottom:.6rem}
+.split-body p{font-size:.87rem;color:var(--mid);line-height:1.8}
+
+.metrics{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.8rem 0}
+.metric{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.3rem;flex:1;min-width:110px;transition:border-color .25s,transform .25s}
+.metric:hover{border-color:rgba(200,0,0,0.3);transform:translateY(-2px)}
+.metric.red-card{background:var(--red);border-color:var(--red)}
+.m-lbl{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.metric.red-card .m-lbl{color:rgba(255,255,255,.6)}
+.m-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--dark);line-height:1}
+.metric.red-card .m-val{color:#fff}
+.m-val.red{color:var(--red)}
+.m-val.green{color:var(--green)}
+.m-sub{font-size:.67rem;color:var(--muted);margin-top:.2rem}
+.metric.red-card .m-sub{color:rgba(255,255,255,.5)}
+
+.tbl-wrap{overflow-x:auto;margin:1.8rem 0;border-radius:10px;border:1px solid var(--border);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+thead tr{background:var(--dark)}
+thead th{text-align:left;padding:.75rem 1rem;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:500}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:var(--bg2)}
+tbody td{padding:.75rem 1rem;color:var(--mid)}
+tbody td:first-child{color:var(--dark);font-weight:500}
+.td-red{color:var(--red)!important;font-weight:600}
+.td-green{color:var(--green)!important;font-weight:600}
+.td-amber{color:var(--amber)!important;font-weight:600}
+tr.hl td{background:rgba(200,0,0,0.05);font-weight:600;color:var(--red)!important}
+
+.numbered{list-style:none;margin:1.2rem 0}
+.numbered li{display:grid;grid-template-columns:44px 1fr;gap:.8rem;padding:1.1rem 0;border-bottom:1px solid var(--border);font-size:.87rem;color:var(--mid);line-height:1.75}
+.numbered li:last-child{border-bottom:none}
+.numbered li strong{color:var(--dark);font-weight:600;display:block;margin-bottom:.15rem}
+.n-num{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--red);padding-top:.1rem}
+
+.bullets{list-style:none;margin:1rem 0}
+.bullets li{padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.87rem;color:var(--mid);display:flex;gap:.8rem;line-height:1.7}
+.bullets li:last-child{border-bottom:none}
+.bullets li::before{content:'—';color:var(--red);flex-shrink:0}
+.bullets li strong{color:var(--dark);font-weight:600}
+
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+.chip{padding:.3rem .85rem;border-radius:50px;border:1px solid var(--border);font-size:.7rem;color:var(--mid);transition:border-color .2s,color .2s}
+.chip:hover{border-color:var(--red);color:var(--red)}
+
+.divider{width:100%;height:1px;background:var(--border);margin:3rem 0}
+
+.cta{background:var(--dark);border-radius:16px;padding:3rem;text-align:center;margin-top:3rem}
+.cta-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,4vw,3.5rem);color:#fff;margin-bottom:.8rem}
+.cta-text{font-size:.87rem;color:rgba(255,255,255,.55);line-height:1.8;max-width:480px;margin:0 auto 1.8rem}
+.cta-btn{display:inline-block;padding:.8rem 2rem;border-radius:50px;background:var(--red);color:#fff;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;text-decoration:none;transition:all .3s;margin:.3rem}
+.cta-btn:hover{background:var(--red2);transform:translateY(-2px)}
+.cta-btn.outline{background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff}
+.cta-btn.outline:hover{border-color:#fff}
+
+.disclaimer{font-size:.7rem;color:var(--muted);line-height:1.7;padding:1.2rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-top:2rem}
+
+/* REVEAL */
+.rev{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.rev.on{opacity:1;transform:translateY(0)}
+
+/* FOOTER */
+footer{background:var(--dark);padding:2rem 4%;display:flex;justify-content:space-between;align-items:center}
+footer span{font-size:.7rem;color:rgba(255,255,255,.4)}
+footer a{font-size:.7rem;color:rgba(255,255,255,.4);text-decoration:none;transition:color .3s}
+footer a:hover{color:#fff}
+
+@media(max-width:900px){
+  #hero{grid-template-columns:1fr}
+  .hero-right{border-top:1px solid var(--border)}
+  #body-wrap{grid-template-columns:1fr}
+  #sidebar{position:static;height:auto}
+  .img-split{grid-template-columns:1fr}
+  .img-split.flip{direction:ltr}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cur"></div>
+<div id="cring"></div>
+<div id="spbar"></div>
+
+<!-- DOLLAR INTRO -->
+<div id="intro">
+  <div class="intro-ring"></div>
+  <div class="intro-dollar">💵</div>
+  <div class="intro-title">HSBC</div>
+  <div class="intro-sub">The Bank That Bet On China · Madhav Arora</div>
+  <button class="intro-skip" onclick="skipIntro()">Skip →</button>
+</div>
+
+<!-- DOLLAR MASCOT -->
+<div id="mascot">
+  <div class="m-speech" id="mspeech">💵 Hi! I'm your dollar guide. Scroll to explore HSBC!</div>
+  <span class="m-emoji" id="memoji">💵</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-hex"><span>H</span></div>
+    <a href="portfolio8.html" class="nav-logo">Madhav Arora</a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#risks">Risks</a></li>
+    <li><a href="#valuation">Valuation</a></li>
+    <li><a href="#call">The Call</a></li>
+  </ul>
+  <a href="https://calendly.com/madhav00027/30min" target="_blank" class="nav-cta">Book a Call</a>
+</nav>
+
+<!-- SPLIT HERO -->
+<section id="hero">
+
+  <!-- LEFT — dark cinematic -->
+  <div class="hero-left">
+    <div class="hero-tag">Equity Research · Banking · Financials</div>
+    <div class="hero-company">HSBC</div>
+    <p class="hero-tagline">The Bank That Bet On China — And Now Faces A Reckoning</p>
+    <div class="rating-strip">
+      <div class="r-pill buy">
+        <div class="r-lbl">Rating</div>
+        <div class="r-val">BUY</div>
+      </div>
+      <div class="r-pill dark">
+        <div class="r-lbl">Current Price</div>
+        <div class="r-val">1,215p</div>
+      </div>
+      <div class="r-pill dark green-val">
+        <div class="r-lbl">12M Target</div>
+        <div class="r-val">1,356p</div>
+      </div>
+      <div class="r-pill dark green-val">
+        <div class="r-lbl">Upside</div>
+        <div class="r-val">+11.6%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT — live data panel -->
+  <div class="hero-right">
+    <div class="live-label"><span class="live-dot"></span>Market Data · April 2026</div>
+
+    <div class="chart-box">
+      <div class="chart-box-head">
+        <div>
+          <div class="chart-box-title">HSBA Share Price</div>
+          <div style="font-size:.7rem;color:var(--muted)">12-month performance</div>
+        </div>
+        <div style="text-align:right">
+          <div class="chart-box-val">1,215p</div>
+          <div class="chart-box-chg">▲ +0.70% today</div>
+        </div>
+      </div>
+      <canvas id="heroChart"></canvas>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="s-lbl">Market Cap</div>
+        <div class="s-val">£208bn</div>
+        <div class="s-sub">FTSE 100 Top 5</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-lbl">Dividend Yield</div>
+        <div class="s-val green">4.1%</div>
+        <div class="s-sub">Div yield TTM</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-lbl">P/E Ratio</div>
+        <div class="s-val">13.1x</div>
+        <div class="s-sub">Sector avg: 9.9x</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-lbl">52W Range</div>
+        <div class="s-val">699–1,410p</div>
+        <div class="s-sub">LSE GBp range</div>
+      </div>
+    </div>
+
+    <div class="hero-author">
+      <div class="author-av">
+        <img src="photo.png" alt="Madhav Arora" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <span class="ini" style="display:none">MA</span>
+      </div>
+      <div>
+        <div class="author-name">Madhav Arora</div>
+        <div class="author-date">April 2026 &nbsp;·&nbsp; 12 min read</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TWO COLUMN BODY -->
+<div id="body-wrap">
+
+  <!-- MAIN ARTICLE COLUMN -->
+  <main id="main-col">
+
+    <h2 class="h2" id="overview">The Story in Plain English</h2>
+    <p class="p">Imagine the world's most global bank. Founded in Hong Kong in 1865 to finance trade between Asia and Europe. Today HSBC operates in 62 countries, serves 40 million customers, and sits at the crossroads of East and West.</p>
+    <p class="p">For decades that position was HSBC's greatest strength. Then the world changed. <strong>The US and China stopped being partners and started being rivals.</strong> Suddenly being the bridge between two hostile superpowers is not an advantage — it is a liability.</p>
+
+    <div class="callout">
+      HSBC is a bridge between two worlds. The problem is both worlds are now trying to blow up the bridge.
+    </div>
+
+    <p class="p">Add in a new CEO trying to restructure a 160-year-old institution, rising loan defaults in Hong Kong property, and a dividend that the market is watching closely — and you have a company under serious pressure. But also one trading at a historically cheap valuation.</p>
+
+    <div class="img-full rev">
+      <img src="diageo/hsbc-chart1.png" alt="HSBC Revenue Trend" onerror="this.parentElement.style.display='none'"/>
+      <p class="img-caption">HSBC revenue and pre-tax profit trend FY2021–FY2025. Upload your chart as hsbc-chart1.png</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2 class="h2" id="risks">Why Is HSBC Under Pressure? — The 5 Risks</h2>
+
+    <div class="img-split rev">
+      <img src="diageo/hsbc-chart2.png" alt="Risk Chart" onerror="this.parentElement.style.display='none'"/>
+      <div class="split-body">
+        <h4>Key Risks Ranked by Severity</h4>
+        <p>Five major forces are weighing on HSBC simultaneously. The US-China tension is the most dangerous — it threatens the very business model that made HSBC great. Upload your risk chart as <strong>hsbc-chart2.png</strong></p>
+      </div>
+    </div>
+
+    <ol class="numbered rev">
+      <li><span class="n-num">01</span><div><strong>US-China Geopolitical Tension (9/10)</strong> HSBC earns ~40% of profits from Asia, reports in USD, and answers to Western regulators. Every escalation in US-China tensions forces HSBC to choose sides — an impossible position for a bank built on being neutral.</div></li>
+      <li><span class="n-num">02</span><div><strong>Hong Kong Property Exposure (8/10)</strong> Hong Kong commercial real estate values fell 30%+ since 2021. HSBC has significant loan exposure to HK property developers. If defaults rise, loan loss provisions will hammer earnings.</div></li>
+      <li><span class="n-num">03</span><div><strong>Structural Restructuring Risk (7/10)</strong> New CEO Georges Elhedery is spinning off the Western business and doubling down on Asia. Restructuring costs, job cuts, and execution risk are all real. Investors hate uncertainty.</div></li>
+      <li><span class="n-num">04</span><div><strong>Interest Rate Sensitivity (6/10)</strong> HSBC's net interest margin boomed when rates rose 2022-2024. As rates fall globally, that tailwind becomes a headwind — NIM compression will squeeze profits in 2025-2026.</div></li>
+      <li><span class="n-num">05</span><div><strong>Regulatory Pressure (5/10)</strong> UK, US and EU regulators are increasingly scrutinising HSBC's China operations. Sanctions compliance costs and regulatory fines are an ongoing drag on the business.</div></li>
+    </ol>
+
+    <div class="divider"></div>
+
+    <h2 class="h2">The Numbers: Key Financials</h2>
+    <p class="p rev">Despite the headwinds, HSBC remains a profit machine. Pre-tax profit of $30bn+ in FY2024 shows the underlying strength of the franchise — even if the market refuses to price it accordingly.</p>
+
+    <div class="metrics rev">
+      <div class="metric red-card">
+        <div class="m-lbl">Pre-Tax Profit</div>
+        <div class="m-val">$32bn</div>
+        <div class="m-sub">FY2024 actual</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Return on Equity</div>
+        <div class="m-val">14.6%</div>
+        <div class="m-sub">Above 12% target</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">CET1 Ratio</div>
+        <div class="m-val green">14.9%</div>
+        <div class="m-sub">Well capitalised</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Cost/Income</div>
+        <div class="m-val red">49%</div>
+        <div class="m-sub">Target: below 48%</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">Div Per Share</div>
+        <div class="m-val green">61¢</div>
+        <div class="m-sub">+6.8% yield</div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap rev">
+      <table>
+        <thead><tr><th>Metric</th><th>FY2022</th><th>FY2023</th><th>FY2024</th><th>FY2025E</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue ($bn)</td><td>51.7</td><td>66.1</td><td>65.8</td><td class="td-amber">63.2</td></tr>
+          <tr><td>Pre-Tax Profit ($bn)</td><td>17.5</td><td>30.3</td><td>32.3</td><td class="td-amber">28.5</td></tr>
+          <tr><td>EPS (¢)</td><td>84</td><td>116</td><td>126</td><td class="td-green">118</td></tr>
+          <tr><td>Dividend (¢)</td><td>32</td><td>61</td><td>61</td><td class="td-green">65</td></tr>
+          <tr><td>RoTE (%)</td><td>9.9</td><td>14.6</td><td>14.6</td><td class="td-amber">12.8</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2 class="h2" id="valuation">Valuation: Priced for Disaster, Built for Survival</h2>
+    <p class="p rev">HSBC trades at <strong>7.2x earnings</strong> — trading at a discount to intrinsic value of ~42% per DCF analysis. The market is pricing in a worst-case scenario: a China crisis, a Hong Kong property collapse, and regulatory sanctions all hitting at once. We think that is too pessimistic.</p>
+
+    <div class="img-split flip rev">
+      <img src="diageo/hsbc-chart3.png" alt="Valuation vs Peers" onerror="this.parentElement.style.display='none'"/>
+      <div class="split-body">
+        <h4>Cheapest Bank in the Room</h4>
+        <p>At 1,215p, HSBC has pulled back ~14% from its all-time high of 1,410p (Feb 2026) — creating a potential entry point. Upload your valuation chart as <strong>hsbc-chart3.png</strong></p>
+      </div>
+    </div>
+
+    <h3 class="h3">Where Could the Price Go?</h3>
+    <div class="tbl-wrap rev">
+      <table>
+        <thead><tr><th>Method</th><th>Implied Price</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Analyst Consensus</td><td>1,280p</td><td>Bloomberg Consensus (Apr 2026)</td></tr>
+          <tr><td>P/E Re-rating (10x)</td><td>1,400p</td><td>15x FY26E EPS of 108¢</td></tr>
+          <tr><td>P/BV Method</td><td>1,300p</td><td>1.1x Tangible Book Value</td></tr>
+          <tr><td>Dividend Discount</td><td>1,250p</td><td>8% cost of equity</td></tr>
+          <tr class="hl"><td>OUR BLENDED TARGET</td><td>1,356p</td><td>Conservative 12-Month View</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2 class="h2" id="call">My Recommendation — The Analyst's Call</h2>
+    <ul class="bullets rev">
+      <li><strong>You are buying a £154bn bank at a 30% discount to peers.</strong> The market has priced in every bad scenario. The reality is likely less bad.</li>
+      <li><strong>6.8% dividend yield is exceptional.</strong> Even if the share price goes nowhere, you collect a near-7% cash return while you wait for the re-rating.</li>
+      <li><strong>The restructuring is actually good news.</strong> Spinning off the Western arm and focusing on Asia-Pacific is what HSBC should have done years ago. Georges Elhedery looks like the right person to do it.</li>
+      <li><strong>China risk is real but overstated.</strong> HSBC survived the 1997 Asian crisis, the 2008 financial crash and COVID. It will survive US-China tensions too.</li>
+      <li><strong>25% upside to our 980p target.</strong> Plus a 6.8% dividend while you wait. Plus the 4.1% dividend yield while you wait.</li>
+    </ul>
+
+    <div class="divider"></div>
+
+    <h3 class="h3">Tools & Methods</h3>
+    <div class="chips rev">
+      <span class="chip">DCF Analysis</span>
+      <span class="chip">P/E Multiples</span>
+      <span class="chip">P/BV Valuation</span>
+      <span class="chip">Dividend Discount Model</span>
+      <span class="chip">Bloomberg Terminal</span>
+      <span class="chip">Stockopedia</span>
+      <span class="chip">HSBC Annual Reports</span>
+      <span class="chip">Microsoft Excel</span>
+    </div>
+
+    <!-- VERDICT BOX -->
+    <div class="rev" style="background:var(--dark);border-radius:16px;overflow:hidden;margin-top:3rem">
+
+      <!-- header strip -->
+      <div style="background:var(--red);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.15em;color:#fff">The Analyst Verdict</div>
+        <div style="background:rgba(255,255,255,0.15);padding:.3rem .9rem;border-radius:50px;font-size:.68rem;letter-spacing:.1em;color:#fff;font-weight:600">APRIL 2026</div>
+      </div>
+
+      <!-- 3 column summary -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.06)">
+        <div style="background:var(--dark);padding:1.5rem;text-align:center">
+          <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.5rem">Rating</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--red);line-height:1">BUY</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.35);margin-top:.3rem">Initiate Coverage</div>
+        </div>
+        <div style="background:var(--dark);padding:1.5rem;text-align:center;border-left:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.5rem">12M Target</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#4ade80;line-height:1">1,356p</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.35);margin-top:.3rem">+11.6% upside</div>
+        </div>
+        <div style="background:var(--dark);padding:1.5rem;text-align:center">
+          <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.5rem">Div Yield</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#facc15;line-height:1">4.1%</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.35);margin-top:.3rem">Paid quarterly</div>
+        </div>
+      </div>
+
+      <!-- 3 bullet reasons -->
+      <div style="padding:1.5rem 2rem;border-top:1px solid rgba(255,255,255,.06)">
+        <div style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem">Why We're Buying</div>
+        <div style="display:flex;flex-direction:column;gap:.85rem">
+          <div style="display:flex;gap:1rem;align-items:flex-start">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.65rem;color:#fff;font-weight:700;margin-top:.1rem">1</div>
+            <div style="font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.6"><strong style="color:#fff">Cheapest it has been since 2020.</strong> Trading 14% below its Feb 2026 all-time high — the market has overreacted.</div>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:flex-start">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.65rem;color:#fff;font-weight:700;margin-top:.1rem">2</div>
+            <div style="font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.6"><strong style="color:#fff">4.1% dividend yield paid quarterly.</strong> You get paid to wait for the re-rating. Total return potential exceeds 15% in 12 months.</div>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:flex-start">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.65rem;color:#fff;font-weight:700;margin-top:.1rem">3</div>
+            <div style="font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.6"><strong style="color:#fff">Restructuring is the right move.</strong> New CEO doubling down on Asia is bold but correct. Goldman Sachs added HSBC to their Conviction Buy List in Q1 2026.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bottom risk warning -->
+      <div style="padding:1rem 2rem;background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.8rem">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.35);line-height:1.5"><strong style="color:rgba(255,255,255,.5)">Key Risk:</strong> US-China tensions escalating further could delay the re-rating. Size position accordingly.</div>
+      </div>
+
+    </div>
+
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> This document is for informational and educational purposes only. It does not constitute investment advice or a recommendation to buy or sell any security. All data sourced from HSBC plc public filings, Bloomberg, Stockopedia and other public sources as at April 2026. Past performance is not indicative of future results.
+    </div>
+
+  </main>
+
+  <!-- STICKY SIDEBAR -->
+  <aside id="sidebar">
+
+    <div class="sb-section">
+      <div class="sb-title">At a Glance</div>
+      <div class="sb-row"><span class="sk">Analyst</span><span class="sv">Madhav Arora</span></div>
+      <div class="sb-row"><span class="sk">Date</span><span class="sv">April 2026</span></div>
+      <div class="sb-row"><span class="sk">Exchange</span><span class="sv">LSE: HSBA</span></div>
+      <div class="sb-row"><span class="sk">Sector</span><span class="sv">Banking</span></div>
+      <div class="sb-row"><span class="sk">Rating</span><span class="sv red">BUY</span></div>
+      <div class="sb-row"><span class="sk">Target</span><span class="sv green">1,356p</span></div>
+      <div class="sb-row"><span class="sk">Upside</span><span class="sv green">+11.6%</span></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Risk Assessment</div>
+      <div style="margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.3rem"><span>US-China Tension</span><span style="color:var(--red);font-weight:600">9/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:90%;background:var(--red)"></div></div>
+      </div>
+      <div style="margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.3rem"><span>HK Property</span><span style="color:var(--red);font-weight:600">8/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:80%;background:#E53E3E"></div></div>
+      </div>
+      <div style="margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.3rem"><span>Restructuring</span><span style="color:var(--amber);font-weight:600">7/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:70%;background:var(--amber)"></div></div>
+      </div>
+      <div style="margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.3rem"><span>Rate Sensitivity</span><span style="color:var(--amber);font-weight:600">6/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:60%;background:var(--amber)"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.3rem"><span>Regulatory</span><span style="color:var(--green);font-weight:600">5/10</span></div>
+        <div class="risk-track"><div class="risk-fill" style="width:50%;background:var(--green)"></div></div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Revenue by Region</div>
+      <canvas id="donutChart" style="max-height:140px"></canvas>
+      <div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.8rem;font-size:.75rem">
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#CC0000;margin-right:6px"></span>Asia Pacific <strong>40%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E53E3E;margin-right:6px"></span>Hong Kong <strong>28%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#888;margin-right:6px"></span>Europe <strong>18%</strong></div>
+        <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#bbb;margin-right:6px"></span>Americas <strong>14%</strong></div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Key Dates</div>
+      <div class="sb-row"><span class="sk">Q1 Results</span><span class="sv">5 May 2026</span></div>
+      <div class="sb-row"><span class="sk">AGM</span><span class="sv">2 May 2026</span></div>
+      <div class="sb-row"><span class="sk">H1 Results</span><span class="sv">29 Jul 2026</span></div>
+      <div class="sb-row"><span class="sk">Ex-Div Date</span><span class="sv amber">12 Jun 2026</span></div>
+    </div>
+
+    <div class="sb-section" style="text-align:center">
+      <div class="sb-title">Discuss This Research</div>
+      <a href="https://calendly.com/madhav00027/30min" target="_blank" style="display:block;background:var(--red);color:#fff;padding:.7rem;border-radius:8px;text-decoration:none;font-size:.75rem;font-weight:600;letter-spacing:.05em;margin-bottom:.6rem">📅 Book a Call</a>
+      <a href="mailto:madhavarora1213@gmail.com" style="display:block;background:var(--bg);border:1px solid var(--border);color:var(--dark);padding:.7rem;border-radius:8px;text-decoration:none;font-size:.75rem;font-weight:600;letter-spacing:.05em">✉️ Email Me</a>
+    </div>
+
+  </aside>
+</div>
+
+<footer>
+  <span>© 2026 Madhav Arora — Financial Analyst</span>
+  <a href="portfolio8.html">← Back to Portfolio</a>
+</footer>
+
+<script>
+/* INTRO */
+document.body.style.overflow='hidden';
+function skipIntro(){
+  document.getElementById('intro').classList.add('hide');
+  setTimeout(function(){document.body.style.overflow='';},850);
+}
+setTimeout(skipIntro,3000);
+
+/* CURSOR */
+var cur=document.getElementById('cur'),cr=document.getElementById('cring'),mx=0,my=0,rx=0,ry=0,con=false;
+document.addEventListener('mousemove',function(e){
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  if(!con){cur.style.opacity='1';cr.style.opacity='1';con=true;}
+});
+(function rl(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(rl);})();
+document.addEventListener('mouseleave',function(){cur.style.opacity='0';cr.style.opacity='0';con=false;});
+document.addEventListener('mouseenter',function(){if(con){cur.style.opacity='1';cr.style.opacity='1';}});
+document.querySelectorAll('a,.metric,.stat-card').forEach(function(el){
+  el.addEventListener('mouseenter',function(){cur.style.width='0';cr.style.width='52px';cr.style.height='52px';cr.style.borderColor='rgba(200,0,0,0.9)';});
+  el.addEventListener('mouseleave',function(){cur.style.width='10px';cur.style.height='10px';cr.style.width='36px';cr.style.height='36px';cr.style.borderColor='rgba(200,0,0,0.4)';});
+});
+
+/* SCROLL PROGRESS */
+window.addEventListener('scroll',function(){
+  var p=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  document.getElementById('spbar').style.width=p+'%';
+  updateMascot(p);
+},{passive:true});
+
+/* DOLLAR MASCOT */
+var sp=document.getElementById('mspeech'),em=document.getElementById('memoji'),ms=document.getElementById('mascot');
+var msgs=[
+  {p:0, e:'💵',t:"Hi! I'm your dollar guide. Scroll to explore HSBC!"},
+  {p:8, e:'🏦',t:"Founded 1865 in Hong Kong to finance the silk trade..."},
+  {p:20,e:'🌏',t:"40% of profits come from Asia. That's the big bet."},
+  {p:33,e:'⚔️', t:"US vs China trade war = HSBC's worst nightmare!"},
+  {p:46,e:'📉',t:"HK property down 30%+. Loan defaults rising..."},
+  {p:58,e:'🤔',t:"But wait — 7.2x P/E? That's historically cheap!"},
+  {p:70,e:'💰',t:"6.8% dividend yield while you wait for recovery!"},
+  {p:82,e:'✅',t:"Target: 980p. That's +25% upside. I'd buy!"},
+  {p:94,e:'💵',t:"Cheers to smart banking! Book a call with Madhav!"},
+];
+var li=-1;
+function updateMascot(p){
+  ms.style.top=Math.max(12,Math.min(80,15+p*.65))+'%';
+  var idx=0;
+  for(var i=0;i<msgs.length;i++){if(p>=msgs[i].p)idx=i;}
+  if(idx===li)return; li=idx;
+  sp.style.opacity='0'; sp.style.transform='translateY(6px)';
+  (function(m){setTimeout(function(){sp.textContent=m.t;em.textContent=m.e;sp.style.opacity='1';sp.style.transform='translateY(0)';},300);})(msgs[idx]);
+}
+
+/* HERO CHART */
+Chart.defaults.color='#888';
+Chart.defaults.font.family='Inter';
+new Chart(document.getElementById('heroChart'),{
+  type:'line',
+  data:{
+    labels:['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    datasets:[{
+      data:[720,780,850,920,980,1050,1120,1200,1380,1410,1320,1270,1215],
+      borderColor:'#CC0000',backgroundColor:'rgba(200,0,0,0.06)',
+      fill:true,tension:.4,borderWidth:2,pointRadius:0
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#111',borderColor:'rgba(200,0,0,0.3)',borderWidth:1}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:9},callback:function(v){return v+'p';}}}}}
+});
+
+/* DONUT CHART */
+new Chart(document.getElementById('donutChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Asia Pacific','Hong Kong','Europe','Americas'],
+    datasets:[{data:[40,28,18,14],backgroundColor:['#CC0000','#E53E3E','#888','#bbb'],borderColor:'#fff',borderWidth:2,hoverOffset:4}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.parsed+'%';}}}}}
+});
+
+/* SCROLL REVEAL */
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target);}});
+},{threshold:0.08});
+document.querySelectorAll('.rev').forEach(function(el){obs.observe(el);});
+
+/* FLOATING BG PARTICLES */
+for(var i=0;i<8;i++){
+  var p=document.createElement('div');
+  var s=Math.random()*40+10;
+  p.style.cssText='position:fixed;border-radius:50%;background:rgba(200,0,0,0.03);pointer-events:none;z-index:0;width:'+s+'px;height:'+s+'px;left:'+Math.random()*100+'%;animation:floatP '+(Math.random()*20+15)+'s linear '+(Math.random()*10)+'s infinite;';
+  document.body.appendChild(p);
+}
+var style=document.createElement('style');
+var style=document.createElement('style');
+style.textContent='@keyframes floatP{0%{transform:translateY(100vh) rotate(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100px) rotate(360deg);opacity:0}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>
